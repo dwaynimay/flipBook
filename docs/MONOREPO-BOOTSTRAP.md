@@ -336,7 +336,7 @@ Ini hanya template kontrak package, bukan instruksi untuk membuat seluruh packag
 3. Buat `pnpm-workspace.yaml`.
 4. Buat `turbo.json`.
 5. Buat `tsconfig.base.json`.
-6. Tambah `.gitignore`, `.editorconfig`, dan Prettier config.
+6. Tambah `.gitignore`, `.gitattributes`, `.editorconfig`, dan Prettier config.
 7. Jalankan `corepack pnpm install`.
 8. Commit sebagai `chore(repo): initialize workspace foundation`.
 
