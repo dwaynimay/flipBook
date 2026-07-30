@@ -71,9 +71,9 @@ must be installed.
 | Lockfile/hygiene scan | Pass; one root `pnpm-lock.yaml`, no nested Git/env/foreign lockfile |
 
 The GitHub Actions workflow uses immutable commit SHAs for checkout and Node
-setup, then runs the same frozen install and quality gates. This is local
-CI-equivalent evidence only. A hosted clean-checkout run cannot occur until an
-initial commit is created and pushed; no hosted result is claimed.
+setup, then runs the same frozen install and quality gates. Hosted clean-checkout
+run `30553017485` passed on commit `7bcce6d468d4c7c1d4d0775d615ecd76da84883c`
+after the repository added an explicit LF policy in `.gitattributes`.
 
 ## Task Closure
 
@@ -85,13 +85,13 @@ initial commit is created and pushed; no hosted result is claimed.
 | FND-003 | DONE | pnpm workspace, lockfile, Turbo graph and dry-run |
 | FND-004 | DONE | Browser/node/react/framework-free config and failing strict negative fixture |
 | FND-005 | DONE | Flat ESLint config and contracts for nested/generic/union JSDoc `any`, wrapped as/angle-bracket double assertions, page-flip isolation, browser API, all-workspace deep imports, and root/subpath dependency boundaries |
-| FND-006 | IN PROGRESS | Workflow exists and local CI-equivalent gates pass; hosted clean-checkout evidence waits for commit/push |
+| FND-006 | DONE | Local gates pass and hosted clean-checkout Quality run `30553017485` passed |
 
 ## Known Blockers and Deferred Work
 
-- FND-007 is blocked because Docker is not installed. PostgreSQL/MinIO compose
-  files were intentionally not created in this batch.
-- FND-006 hosted clean-checkout evidence is pending the initial commit and push.
+- FND-007 is now in progress: Docker, PostgreSQL, and MinIO are healthy, but
+  container image versions still require immutable pinning before the
+  reproducibility criterion is closed.
 - Root scripts intentionally expose only real owners: build, format,
   format-check, license-check, lint, test, and typecheck. Dev, clean, and E2E
   scripts will be added only when an owning app/package implements them.

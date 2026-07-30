@@ -30,8 +30,8 @@ ID task stabil dan dipakai pada commit, PR, ADR, serta laporan verifikasi.
 | FND-003 | DONE | Lockfile tunggal dan Turbo dry-run tervalidasi |
 | FND-004 | DONE | Strict shared config, framework-free config, dan negative compiler fixture lulus |
 | FND-005 | DONE | Zero-warning lint dan boundary-policy contract tests lulus |
-| FND-006 | IN PROGRESS | Seluruh gate lokal ekuivalen lulus; hosted clean-checkout CI menunggu initial commit/push |
-| FND-007 | BLOCKED | Docker belum tersedia; tidak dipasang oleh batch foundation |
+| FND-006 | DONE | Gate lokal dan hosted clean-checkout Quality run `30553017485` lulus |
+| FND-007 | IN PROGRESS | Docker/PostgreSQL/MinIO healthy; immutable image pinning masih harus ditutup |
 
 ## Task Fields
 
