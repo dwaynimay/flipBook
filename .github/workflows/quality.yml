@@ -1,0 +1,64 @@
+name: Quality
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  foundation:
+    name: Foundation quality gates
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.18.0
+
+      - name: Activate the locked pnpm version
+        shell: pwsh
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.18.0 --activate
+          corepack pnpm --version
+
+      - name: Install dependencies
+        shell: pwsh
+        run: corepack pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        shell: pwsh
+        run: corepack pnpm run format:check
+
+      - name: Lint with zero warnings
+        shell: pwsh
+        run: corepack pnpm run lint
+
+      - name: Typecheck
+        shell: pwsh
+        run: corepack pnpm run typecheck
+
+      - name: Test
+        shell: pwsh
+        run: corepack pnpm run test
+
+      - name: Build
+        shell: pwsh
+        run: corepack pnpm run build
+
+      - name: Verify dependency licenses
+        shell: pwsh
+        run: corepack pnpm run license:check

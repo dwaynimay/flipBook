@@ -1,0 +1,7 @@
+{
+  "extends": "../../framework-free.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["strict-guards.ts"]
+}

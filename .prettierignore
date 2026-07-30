@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+.vite/
+graphify-out/
+pnpm-lock.yaml
+
+# Approved source documents predate the formatter baseline.
+AGENTS.md
+THIRD_PARTY_LICENSES.md
+docs/

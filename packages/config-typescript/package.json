@@ -1,0 +1,30 @@
+{
+  "name": "@booklet/typescript-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./browser.json": "./browser.json",
+    "./framework-free.json": "./framework-free.json",
+    "./node.json": "./node.json",
+    "./react-library.json": "./react-library.json"
+  },
+  "files": [
+    "browser.json",
+    "framework-free.json",
+    "node.json",
+    "react-library.json"
+  ],
+  "scripts": {
+    "build": "pnpm run typecheck && pnpm run validate:configs",
+    "lint": "eslint . --max-warnings=0",
+    "test": "node test-configs.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "validate:configs": "tsc -p fixtures/valid/tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "eslint": "10.8.0",
+    "typescript": "6.0.3"
+  }
+}

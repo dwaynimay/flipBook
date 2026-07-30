@@ -1,0 +1,27 @@
+{
+  "name": "interactive-digital-booklet",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.18.0",
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": "11.18.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "license:check": "node tooling/scripts/check-licenses.mjs",
+    "lint": "turbo run lint && eslint eslint.config.mjs prettier.config.mjs --max-warnings=0",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "@booklet/eslint-config": "workspace:*",
+    "@types/node": "24.13.3",
+    "eslint": "10.8.0",
+    "prettier": "3.9.6",
+    "turbo": "2.10.7",
+    "typescript": "6.0.3"
+  }
+}

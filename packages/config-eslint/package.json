@@ -1,0 +1,33 @@
+{
+  "name": "@booklet/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.mjs"
+  },
+  "files": [
+    "index.mjs",
+    "rules"
+  ],
+  "scripts": {
+    "build": "pnpm run typecheck",
+    "lint": "eslint . --max-warnings=0",
+    "test": "node test-config.mjs",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@eslint/js": "10.0.1",
+    "typescript-eslint": "8.65.0"
+  },
+  "devDependencies": {
+    "@booklet/typescript-config": "workspace:*",
+    "@types/node": "24.13.3",
+    "eslint": "10.8.0",
+    "typescript": "6.0.3"
+  },
+  "peerDependencies": {
+    "eslint": "^10.0.0",
+    "typescript": ">=5.0.0 <6.1.0"
+  }
+}
