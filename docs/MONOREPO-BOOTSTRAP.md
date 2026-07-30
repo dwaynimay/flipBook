@@ -2,10 +2,12 @@
 
 ## Status
 
-Approved. Fondasi root dan shared config pada FND-001 sampai FND-005 selesai,
-sedangkan implementasi workflow FND-006 dan seluruh gate lokal ekuivalen
-selesai pada 30 Juli 2026. Bukti hosted clean-checkout CI masih menunggu initial
-commit/push. Hasil command aktual dicatat di `FOUNDATION-VERIFICATION.md`.
+Approved. Fondasi root, shared config, hosted CI, dan local infrastructure pada
+FND-001 sampai FND-007 selesai. Risiko CVE pada exact-pinned PostgreSQL dan
+MinIO diterima sementara oleh Product Owner hanya untuk loopback local
+development, dengan review paling lambat 31 Agustus 2026 atau saat image resmi
+baru tersedia. Hasil command aktual dicatat di
+`FOUNDATION-VERIFICATION.md`.
 
 ## 1. Pilihan
 
@@ -398,7 +400,52 @@ Periksa:
 - tidak ada `.env` yang di-commit;
 - internal dependency memakai `workspace:*`.
 
-## 14. Catatan Tentang npm Workspaces
+## 14. Local Infrastructure Reproducibility
+
+`docker-compose.yml` menyediakan PostgreSQL 17.10 dan MinIO development lokal.
+Setiap image menggunakan release tag yang dapat dibaca dan immutable
+multi-platform manifest digest. Named volume mempertahankan data pada container
+restart maupun recreate:
+
+```text
+postgres_data -> /var/lib/postgresql/data
+minio_data    -> /data
+```
+
+Validasi dan startup:
+
+```powershell
+docker compose config --quiet
+docker compose up -d --wait
+docker compose ps
+```
+
+Semua port dipublikasikan hanya ke `127.0.0.1`. Jangan menambahkan
+`container_name`; biarkan Compose memberi nama berdasarkan project agar clone
+dan worktree dapat diisolasi. Gunakan service discovery:
+
+```powershell
+docker compose exec -T postgres pg_isready
+docker compose exec -T minio minio --version
+```
+
+Gunakan `docker compose down` hanya bila container perlu dihentikan. Jangan
+menjalankan `docker compose down --volumes`, `docker volume rm`, atau operasi
+setara sebagai bagian workflow normal. Nilai `.env.example` hanya kredensial
+default lokal untuk binding loopback. Jangan menaruh credential real/private di
+`.env.example`; gunakan `.env` yang ignored untuk override lokal.
+
+Clean-bootstrap test wajib memakai project name unik, alternate loopback ports,
+dan volume project-scoped baru. Sebelum cleanup, verifikasi label
+`com.docker.compose.project` serta daftar nama container/volume. Hanya project
+sementara yang tervalidasi boleh menjalankan `down --volumes`; volume utama
+tidak boleh disentuh.
+
+MinIO tunduk pada pengecualian AGPLv3 local-only dalam ADR-008. Semua image
+update wajib melewati Container Image Update Gate dalam
+`THIRD_PARTY_LICENSES.md`.
+
+## 15. Catatan Tentang npm Workspaces
 
 npm workspaces tetap memungkinkan, tetapi keputusan proyek ini adalah pnpm karena:
 
@@ -409,7 +456,7 @@ npm workspaces tetap memungkinkan, tetapi keputusan proyek ini adalah pnpm karen
 
 Jangan mencampur npm dan pnpm setelah lockfile pertama dibuat.
 
-## 15. Output Phase 0
+## 16. Output Phase 0
 
 Phase 0 dianggap selesai jika repository memiliki:
 

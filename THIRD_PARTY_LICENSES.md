@@ -4,8 +4,8 @@
 
 | Metadata | Nilai |
 | --- | --- |
-| Status | Approved baseline — foundation dependencies locked |
-| Tanggal verifikasi | 30 Juli 2026 |
+| Status | Approved baseline — dependencies locked; FND-007 local image risk accepted temporarily |
+| Tanggal verifikasi | 31 Juli 2026 |
 | Scope | Dependency terpasang dan kandidat dependency produk |
 | Release authority | Lockfile dan generated notice bundle |
 
@@ -32,6 +32,9 @@ Tidak semua package di bagian “evaluated/conditional” akan dipasang.
 - dual-license bila proyek memilih opsi permissive secara sah dan menyimpan notice;
 - MPL-2.0 hanya setelah review file-level copyleft dan distribusi;
 - source-copy component hanya jika provenance dan license text dipertahankan.
+- MinIO Community Server GNU AGPLv3 hanya untuk container development lokal
+  exact-version yang disetujui dalam ADR-008. Pengecualian ini tidak berlaku
+  untuk staging, production, redistribusi, modifikasi, atau hosted service.
 
 ### Dilarang Tanpa Persetujuan Tertulis
 
@@ -102,6 +105,33 @@ BlueOak sempit tersebut. Sinkronisasi package terlarang ke allowlist tidak dapat
 melewati policy. Binary native Turborepo dimodelkan sebagai satu grup alternatif
 lintas Windows, Linux, dan Darwin: tepat satu package dengan nama, versi, dan
 license yang disetujui harus terpasang.
+
+### Local Infrastructure Images
+
+| Image/project | Tag dan manifest digest terkunci | License | Pemakaian | Status |
+| --- | --- | --- | --- | --- |
+| PostgreSQL official image | `postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193` | PostgreSQL License; Alpine/base notices retained in image | Database development lokal | Pinned; CVE risk accepted temporarily for loopback-only local development |
+| MinIO Community Server | `minio/minio:RELEASE.2025-09-07T16-13-09Z@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e` | GNU AGPLv3 | S3-compatible storage development lokal | Pinned under ADR-008; CVE risk accepted temporarily for loopback-only local development |
+
+Image references use a human-readable release tag plus an immutable
+multi-platform manifest digest. The digest controls the actual content; the tag
+keeps the reviewed release understandable. MinIO approval is local-only and
+does not change the general AGPL prohibition.
+
+The Product Owner owns the temporary CVE risk disposition for these exact
+digests. Staging, production, hosted use, non-loopback exposure, and sensitive
+data are prohibited. Re-review is required no later than 31 August 2026 or when
+a newer official image becomes available, whichever occurs first. See
+`docs/FND-007-IMAGE-SECURITY-TRIAGE.md`.
+
+Sources:
+
+- https://hub.docker.com/_/postgres
+- https://github.com/docker-library/postgres
+- https://www.postgresql.org/about/licence/
+- https://github.com/minio/minio/releases/tag/RELEASE.2025-09-07T16-13-09Z
+- https://github.com/minio/minio/blob/RELEASE.2025-09-07T16-13-09Z/LICENSE
+- `docs/adr/ADR-008-local-object-storage.md`
 
 ## 4. Planned Frontend and Interaction Dependencies
 
@@ -268,6 +298,14 @@ tooling yang sudah dicatat.
 
 Preserve the applicable PostgreSQL copyright and permission notice.
 
+### GNU AGPLv3 — MinIO Local-Development Exception
+
+Preserve the MinIO copyright and GNU AGPLv3 license supplied with the image and
+retain the upstream source reference for the exact release. ADR-008 approves
+only unmodified local-development use. Distribution, modification, staging,
+production, or hosted-service use requires a fresh engineering and legal
+review.
+
 ### DOMPurify Dual License
 
 The planned policy is to consume DOMPurify under its Apache-2.0 option and record that choice in generated notices. Confirm the distributed package license files at lock time.
@@ -318,7 +356,32 @@ corepack pnpm run license:check
 
 Release tetap memerlukan inventory production dan notice bundle terpisah.
 
-## 12. Change Control
+## 12. Container Image Update Gate
+
+Every PostgreSQL or MinIO image addition/update must:
+
+1. Verify the official registry, source repository, release tag, and provenance.
+2. Record a human-readable exact tag plus immutable multi-platform manifest
+   digest.
+3. Verify the project license, bundled/base-image notices, and the permitted
+   environment.
+4. Scan the exact digest for current advisories, distinguish total/fixable/
+   suppressed findings, and obtain explicit risk disposition for unresolved
+   critical/high findings.
+5. Review PostgreSQL major/data-directory compatibility or MinIO data-format and
+   S3 API compatibility as applicable.
+6. Validate Compose config, loopback binding, healthchecks, query/HTTP smoke
+   tests, and named-volume persistence across restart and recreate.
+7. Run a clean bootstrap under a unique temporary Compose project with
+   alternate loopback ports and new project-scoped volumes; remove only the
+   verified temporary resources afterward.
+8. Update this register, the applicable ADR, security triage, verification
+   record, and rollback/upgrade evidence.
+
+A tag/digest pin proves identity and reproducibility; it does not imply
+security approval.
+
+## 13. Change Control
 
 Any dependency addition, removal, or version-major change must update:
 

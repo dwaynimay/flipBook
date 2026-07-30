@@ -39,14 +39,16 @@ Kita tidak menggunakan NestJS native monorepo sebagai monorepo kedua. `apps/api`
 | HTTP adapter | Express untuk MVP | Integrasi dan dokumentasi paling sederhana |
 | Database | PostgreSQL | Relasional, transaksi, JSONB, indexing |
 | ORM | Prisma 7 | Schema, migration, typed client |
-| Object storage | MinIO lokal; S3-compatible production | API storage konsisten antar-environment |
+| Object storage | MinIO lokal; S3-compatible production | API storage konsisten antar-environment; local AGPL exception dibatasi ADR-008 |
 | Auth | Email/password + session refresh cookie | Sederhana dan aman untuk MVP |
 | Flip engine | Adapter di atas `react-pageflip`/StPageFlip | Efek realistis tanpa mengikat domain ke library |
 | Testing | Vitest, Testing Library, Supertest, Playwright | Unit, integration, dan end-to-end |
 | API contract | OpenAPI dari NestJS | Dokumentasi dan client generation |
 | Local infrastructure | Docker Compose | PostgreSQL dan MinIO reproducible |
 
-Versi dependency harus dikunci oleh lockfile dan diperbarui melalui PR terpisah. Jangan menggunakan tag `latest` di `package.json`.
+Versi dependency package harus dikunci oleh lockfile dan diperbarui melalui PR
+terpisah. Container development memakai release tag yang dapat dibaca sekaligus
+immutable manifest digest; mutable tag seperti `latest` dilarang.
 
 ## 3. Struktur Monorepo
 
@@ -455,6 +457,14 @@ Managed services
 
 Deployment pertama tidak memerlukan Kubernetes. Docker image untuk API dan static assets/CDN untuk frontend sudah cukup.
 
+Local Docker Compose menggunakan PostgreSQL dan MinIO dengan named volume.
+Container image wajib berbentuk `release-tag@sha256:manifest-digest`. Volume
+tidak boleh dihapus sebagai bagian startup, update image, atau healthcheck.
+MinIO Community Server hanya disetujui untuk development lokal berdasarkan
+ADR-008; production tetap memakai provider S3-compatible yang direview terpisah.
+Semua image baru atau update wajib melewati Container Image Update Gate dalam
+`THIRD_PARTY_LICENSES.md`; digest tidak menyiratkan security approval.
+
 ## 16. Architecture Decision Records yang Perlu Dibuat
 
 - ADR-001: pnpm workspace + Turborepo
@@ -464,4 +474,4 @@ Deployment pertama tidak memerlukan Kubernetes. Docker image untuk API dan stati
 - ADR-005: flipbook adapter dan vertical fallback
 - ADR-006: cookie-based refresh session
 - ADR-007: reminder MVP limitation
-- ADR-008: MinIO local dan S3-compatible production
+- ADR-008: MinIO local dan S3-compatible production — accepted

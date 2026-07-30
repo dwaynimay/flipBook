@@ -25,13 +25,13 @@ ID task stabil dan dipakai pada commit, PR, ADR, serta laporan verifikasi.
 | Task | Status | Bukti/catatan |
 | --- | --- | --- |
 | GOV-001 | DONE | `APPROVALS.md`; seluruh baseline berstatus approved |
-| FND-001 | DONE | `FOUNDATION-VERIFICATION.md`; Docker hanya memblokir FND-007 |
+| FND-001 | DONE | `FOUNDATION-VERIFICATION.md`; Docker/WSL dan environment preflight tervalidasi |
 | FND-002 | DONE | Git `main`, ignore/editor conventions, hygiene scan |
 | FND-003 | DONE | Lockfile tunggal dan Turbo dry-run tervalidasi |
 | FND-004 | DONE | Strict shared config, framework-free config, dan negative compiler fixture lulus |
 | FND-005 | DONE | Zero-warning lint dan boundary-policy contract tests lulus |
 | FND-006 | DONE | Gate lokal dan hosted clean-checkout Quality run `30553017485` lulus |
-| FND-007 | IN PROGRESS | Docker/PostgreSQL/MinIO healthy; immutable image pinning masih harus ditutup |
+| FND-007 | DONE | Exact image pins, loopback isolation, healthchecks, clean bootstrap, persistence, license/ADR records, dan time-bounded Product Owner CVE disposition lulus |
 
 ## Task Fields
 
@@ -60,7 +60,7 @@ ID task stabil dan dipakai pada commit, PR, ADR, serta laporan verifikasi.
 | FND-004 | `packages/config-typescript` | FND-003 | Strict browser/node TypeScript configurations tersedia | Compiler flags wajib aktif; negative type fixture membuktikan guard |
 | FND-005 | `packages/config-eslint` | FND-003 | ESLint/format policy zero-warning dan forbidden-pattern checks tersedia | Lint mendeteksi `any`, unsafe imports, dan boundary violation yang relevan |
 | FND-006 | CI/tooling | FND-003, FND-004, FND-005 | CI frozen install, format, lint, typecheck, test, build, dan license gate tersedia | Clean checkout pipeline hijau tanpa skip tersembunyi |
-| FND-007 | local infrastructure | FND-001 | PostgreSQL dan MinIO development mempunyai reproducible startup/healthcheck/data-volume policy | Healthcheck lulus; credential development tidak di-commit |
+| FND-007 | local infrastructure | FND-001 | PostgreSQL dan MinIO development mempunyai reproducible startup/healthcheck/data-volume policy | Healthcheck lulus; tidak ada kredensial real/private yang di-commit; documented defaults hanya untuk loopback local development |
 | FND-008 | `packages/observability` | FND-003 | Typed config, structured logging, correlation ID, dan secret redaction foundation tersedia | Unit test redaction/correlation; tidak ada sensitive log fixture |
 
 ## Phase 0B — Contracts dan Dependency Spikes
