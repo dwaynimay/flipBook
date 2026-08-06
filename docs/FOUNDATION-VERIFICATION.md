@@ -5,9 +5,9 @@
 | Field | Value |
 | --- | --- |
 | Date | 6 August 2026 |
-| Tasks | GOV-001–GOV-003, FND-001–FND-008 |
+| Tasks | GOV-001–GOV-003, FND-001–FND-008, CON-001 |
 | Repository | `D:\Github\flipBook` |
-| Feature code | None |
+| Feature code | Framework-free content contract only; no application composition |
 
 ## Environment Preflight
 
@@ -45,8 +45,8 @@ Registry metadata was queried before the lockfile was generated.
 | `@types/node` | `24.13.3` | MIT | Matches Node 24 tooling baseline |
 | minimatch (transitive) | `10.2.6` | BlueOak-1.0.0 | Permissive license recorded; tooling only |
 | Pino | `10.3.1` | MIT | Structured logger implementation isolated by `@booklet/observability` |
-| Zod | `4.4.3` | MIT | Runtime parsing for typed observability config; public contracts do not expose Zod types |
-| Vitest | `4.1.10` | MIT | Observability unit and contract tests |
+| Zod | `4.4.3` | MIT | Runtime parsing for typed observability config and content documents; public contracts do not expose Zod types |
+| Vitest | `4.1.10` | MIT | Observability and content-schema unit/contract tests |
 | Lightning CSS (transitive) | `1.33.0` | MPL-2.0 | Exact development-only Vitest/Vite tooling exception; not exported or distributed by the package |
 | brace-expansion (transitive) | `5.0.9` | MIT | Narrow workspace override closes GHSA-rgw5-rvv9-x895 in the tooling graph |
 
@@ -132,19 +132,39 @@ and log an approved machine `errorCode` separately when classification is
 needed. The Error projection intentionally does not retain third-party message
 or stack text.
 
+## CON-001 Content Schema Evidence
+
+| Check | Actual result |
+| --- | --- |
+| Package boundary | `@booklet/content-schema` extends the framework-free TypeScript preset; runtime source has no React, NestJS, Prisma, DOM, or Node API dependency |
+| Document contract | `schemaVersion: 1`, validated branded identifiers, portrait page preset, three allowlisted background design tokens, and required image/video aspect-ratio width/height integers bounded from 1 through 10,000 |
+| MVP union | Exact discriminants are `heading`, `paragraph`, `image`, `video`, `callout`, `quote`, `button-link`, `divider`, `myth-fact`, and `quiz-trigger`; all require `version: 1` and strict typed props |
+| Trust boundary | A descriptor-based preflight accepts only bounded acyclic JSON-compatible plain records/dense arrays, rejects dangerous own keys at every depth, never invokes accessors, and clones validated records onto null prototypes before Zod. All reflection stages contain hostile, revoked, or state-changing Proxy traps as stable failures without leaking hostile errors. Clone traversal independently enforces its own active-cycle set, maximum depth, and one cumulative node budget so post-preflight mutations cannot expand without bound. Unknown fields, arbitrary CSS values, unsafe link protocols, embedded media URLs, and malformed references are rejected. HTML-looking text remains inert plain text. |
+| Invariants | Block IDs are unique per page; informative images require alt text and decorative images require empty alt text; media, myth/fact, and quiz content remain stable ID references rather than embedded records |
+| Public API | `parsePageDocument` and `safeParsePageDocument` explicitly map validated schema output into readonly contracts without a whole-document assertion. Each public brand has named parse/safe-parse constructors. All errors use a stable project-owned discriminated code/message contract; generated declarations expose no Zod, React, NestJS, Prisma, DOM, Node, Pino, or `any` types. |
+| Tests | Vitest passed 1 file and 43 tests covering all ten valid variants, typed mapped props, required/bounded media geometry, stable issue codes/messages/paths, all brand constructors, unknown/invalid fixtures, duplicate IDs, image accessibility, inert HTML-looking text, adversarial dangerous-key/accessor/cycle/non-plain/sparse/augmented inputs, hostile/revoked/stateful Proxy reflection traps, and clone-only cycle/depth/cumulative-node expansion |
+| Deterministic build | A tooling-owned cross-platform cleaner removes `packages/content-schema/dist` before TypeScript emits; a planted `dist/stale-source.js` artifact was absent after the clean build |
+| Dependency security | Zod `4.4.3` and Vitest `4.1.10` were already exact-locked and licensed; adding the workspace importer did not change the 148-record overall or 103-record production inventories; package audit remains clean at high severity |
+
+The v1 `button-link` block represents the PRD's combined button/link capability
+with an allowlisted visual appearance and HTTPS-only external destination.
+Internal reader navigation is a separate logical-page contract. The persisted
+page preset remains portrait because landscape behavior belongs to reader
+spread/orientation mapping, not arbitrary page styling.
+
 ## Quality-Gate Evidence
 
 | Command | Result |
 | --- | --- |
 | `corepack pnpm install --frozen-lockfile` | Pass; lockfile unchanged |
 | `corepack pnpm run format:check` | Pass |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run lint` | Pass uncached; 4/4 workspace tasks, zero warnings |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run typecheck` | Pass uncached; 4/4 workspace tasks |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run test` | Pass uncached; 4/4 workspace test owners; observability contributed 4 Vitest files/33 tests in addition to compiler, ESLint, and license-policy contracts |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run build` | Pass uncached; 4/4 workspace tasks |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run lint` | Pass uncached; 5/5 workspace tasks, zero warnings |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run typecheck` | Pass uncached; 5/5 workspace tasks |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run test` | Pass uncached before the final Proxy regression additions; 7/7 task graph owners. The final targeted content-schema rerun passed 1 Vitest file/43 tests; observability contributed 4 files/33 tests in the uncached root run. |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run build` | Pass uncached; 5/5 workspace tasks |
 | `corepack pnpm run license:check` | Pass; 148 exact installed package-version records across 7 approved licenses; production inventory 103 records across 6 licenses |
-| `corepack pnpm exec turbo run build --dry=json` | Pass; 4 valid build tasks |
-| `corepack pnpm exec turbo run typecheck --dry=json` | Pass; 4 valid typecheck tasks and workspace dependency ordering preserve the shared TypeScript config boundary |
+| `corepack pnpm exec turbo run build --dry=json` | Pass; 5 valid build tasks |
+| `corepack pnpm exec turbo run typecheck --dry=json` | Pass; 5 valid typecheck tasks and workspace dependency ordering preserve the shared TypeScript config boundary |
 | `corepack pnpm audit --audit-level high` | Pass; no known vulnerabilities |
 | Lockfile/hygiene scan | Pass; one root `pnpm-lock.yaml`, no nested Git/env/foreign lockfile |
 
@@ -168,6 +188,7 @@ after the repository added an explicit LF policy in `.gitattributes`.
 | FND-006 | DONE | Local gates pass and hosted clean-checkout Quality run `30553017485` passed |
 | FND-007 | DONE | Reproducibility, loopback isolation, clean bootstrap, persistence, license record, ADR-008, and time-bounded Product Owner CVE risk disposition verified |
 | FND-008 | DONE | Typed config, nominal structured logger/correlation boundaries with runtime issuance guards, accumulated context, safe Error projection, keyed structured-field redaction, public type isolation, 4 files/33 tests, development plus production license gates, and clean package audit verified |
+| CON-001 | DONE | Framework-free PageDocument v1 contract, ten strict block variants, required media geometry, legal branded constructors, bounded Proxy-safe JSON trust preflight/clone, stable project-owned validation surface, explicit schema-output mapping, exhaustive `never`, deterministic clean build, declaration isolation, and 1 file/43 tests verified |
 
 ## Known Risks and Deferred Work
 

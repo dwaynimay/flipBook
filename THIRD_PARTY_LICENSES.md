@@ -154,7 +154,7 @@ Sources:
 | `@tanstack/react-query` | 5.101.4 | MIT | Server state | Planned |
 | `@tanstack/react-table` | 8.21.3 | MIT | Admin tables | Planned |
 | `react-hook-form` | 7.83.0 | MIT | Forms | Planned |
-| Zod | 4.4.3 | MIT | Runtime schema; typed config boundary di `packages/observability` | Locked for FND-008 |
+| Zod | 4.4.3 | MIT | Runtime schema in `packages/observability` and `packages/content-schema` | Locked for FND-008 and CON-001 |
 | Motion (`motion`) | 12.42.2 | MIT | Stateful animation | Planned |
 | Recharts | 3.10.1 | MIT | Dashboard/progress charts | Planned |
 | `@daypicker/react` | 10.0.1 | MIT | Calendar/date selection | Planned |
@@ -248,7 +248,7 @@ Sources:
 
 | Package/project | Versi teramati | License | Pemakaian | Status |
 | --- | ---: | --- | --- | --- |
-| Vitest | 4.1.10 | MIT | Unit/component tests; contract tests `packages/observability` | Locked for FND-008 |
+| Vitest | 4.1.10 | MIT | Unit/component tests; contracts for observability and content schema | Locked for FND-008 and CON-001 |
 | Testing Library React | 16.3.2 | MIT | React behavior tests | Planned |
 | Playwright Test | 1.62.0 | Apache-2.0 | Browser E2E | Planned |
 | Supertest | 7.2.2 | MIT | HTTP integration tests | Planned |

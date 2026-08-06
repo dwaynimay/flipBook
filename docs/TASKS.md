@@ -35,6 +35,7 @@ ID task stabil dan dipakai pada commit, PR, ADR, serta laporan verifikasi.
 | FND-006 | DONE | Gate lokal dan hosted clean-checkout Quality run `30553017485` lulus |
 | FND-007 | DONE | Exact image pins, loopback isolation, healthchecks, clean bootstrap, persistence, license/ADR records, dan time-bounded Product Owner CVE disposition lulus |
 | FND-008 | DONE | `@booklet/observability`: typed config, isolated logger contracts, correlation ID, dan keyed structured-field redaction lulus; hasil command dan hitungan canonical berada di `FOUNDATION-VERIFICATION.md` |
+| CON-001 | DONE | `@booklet/content-schema`: `PageDocument` v1, sepuluh MVP block variants, legal branded-value constructors, strict token/preset/media-geometry fields, JSON-safe trust preflight, stable project-owned validation results, cross-field invariants, dan exhaustive contract lulus; bukti berada di `FOUNDATION-VERIFICATION.md` |
 
 ## Task Fields
 
