@@ -26,6 +26,21 @@ const permittedLicenseIdentifiers = new Set([
   "PostgreSQL",
 ]);
 
+const permittedMplPackageKeys = new Set([
+  "lightningcss@1.33.0",
+  "lightningcss-android-arm64@1.33.0",
+  "lightningcss-darwin-arm64@1.33.0",
+  "lightningcss-darwin-x64@1.33.0",
+  "lightningcss-freebsd-x64@1.33.0",
+  "lightningcss-linux-arm-gnueabihf@1.33.0",
+  "lightningcss-linux-arm64-gnu@1.33.0",
+  "lightningcss-linux-arm64-musl@1.33.0",
+  "lightningcss-linux-x64-gnu@1.33.0",
+  "lightningcss-linux-x64-musl@1.33.0",
+  "lightningcss-win32-arm64-msvc@1.33.0",
+  "lightningcss-win32-x64-msvc@1.33.0",
+]);
+
 /**
  * @param {unknown} value
  * @returns {value is Readonly<Record<string, unknown>>}
@@ -160,6 +175,16 @@ function assertPermittedLicense(packageKey, license) {
     return;
   }
 
+  if (license === "MPL-2.0") {
+    if (!permittedMplPackageKeys.has(packageKey)) {
+      throw new Error(
+        `MPL-2.0 is approved only for the exact Lightning CSS 1.33.0 development toolchain, not ${packageKey}.`,
+      );
+    }
+
+    return;
+  }
+
   if (!permittedLicenseIdentifiers.has(license)) {
     throw new Error(`Prohibited or unapproved license for ${packageKey}: ${license}.`);
   }
@@ -267,4 +292,32 @@ function validateExactLicenseInventory(
   };
 }
 
-export { normalizePnpmInventory, parseLicenseAllowlist, validateExactLicenseInventory };
+/**
+ * @param {readonly LicenseRecord[]} records
+ * @returns {{ readonly licenseCount: number; readonly packageCount: number }}
+ */
+function validateProductionLicenseInventory(records) {
+  const production = createRecordMap(records, "production");
+
+  for (const [packageKey, license] of production) {
+    assertPermittedLicense(packageKey, license);
+
+    if (license === "MPL-2.0") {
+      throw new Error(
+        `Development-only MPL-2.0 dependency entered the production inventory: ${packageKey}.`,
+      );
+    }
+  }
+
+  return {
+    licenseCount: new Set(production.values()).size,
+    packageCount: production.size,
+  };
+}
+
+export {
+  normalizePnpmInventory,
+  parseLicenseAllowlist,
+  validateExactLicenseInventory,
+  validateProductionLicenseInventory,
+};

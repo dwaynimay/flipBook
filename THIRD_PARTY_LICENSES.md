@@ -5,7 +5,7 @@
 | Metadata | Nilai |
 | --- | --- |
 | Status | Approved baseline — dependencies locked; FND-007 local image risk accepted temporarily |
-| Tanggal verifikasi | 31 Juli 2026 |
+| Tanggal verifikasi | 6 Agustus 2026 |
 | Scope | Dependency terpasang dan kandidat dependency produk |
 | Release authority | Lockfile dan generated notice bundle |
 
@@ -95,16 +95,30 @@ TypeScript 7.0.2 tidak masuk lockfile foundation karena peer dependency
 | minimatch | 10.2.6 | BlueOak-1.0.0 | Transitive glob matching pada ESLint toolchain |
 | actions/checkout | `d23441a48e516b6c34aea4fa41551a30e30af803` (`v6`) | MIT | CI checkout |
 | actions/setup-node | `249970729cb0ef3589644e2896645e5dc5ba9c38` (`v6`) | MIT | CI Node.js setup |
+| Vite | 8.2.0 | MIT | Transitive test transform melalui Vitest; bukan Vite app yang masih planned |
+| Lightning CSS | 1.33.0 | MPL-2.0 | Transitive development-only melalui Vitest/Vite; tidak masuk runtime atau artifact `dist` |
+| brace-expansion | 5.0.9 | MIT | Narrow workspace security override untuk menutup GHSA-rgw5-rvv9-x895 pada tooling graph |
 
 BlueOak-1.0.0 dibatasi hanya untuk `minimatch@10.2.6`. Inventaris
 package/version/license lengkap yang disetujui berada di
 `tooling/scripts/licenses-allowlist.json`. License gate membandingkan inventory
 terpasang secara exact dan secara independen menolak identifier di luar MIT,
 Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, PostgreSQL, serta pengecualian
-BlueOak sempit tersebut. Sinkronisasi package terlarang ke allowlist tidak dapat
-melewati policy. Binary native Turborepo dimodelkan sebagai satu grup alternatif
-lintas Windows, Linux, dan Darwin: tepat satu package dengan nama, versi, dan
-license yang disetujui harus terpasang.
+BlueOak sempit tersebut. Lightning CSS dan satu binary platform-nya diizinkan
+secara exact hanya pada versi 1.33.0 sebagai transitive development tool Vitest;
+source tidak disalin atau dimodifikasi dan package ini tidak diekspor oleh
+`@booklet/observability`. Jika tool tersebut didistribusikan, MPL-2.0 dan source
+availability obligations wajib direview ulang. Sinkronisasi package terlarang ke
+allowlist tidak dapat melewati policy. Binary native Turborepo, Rolldown, dan
+Lightning CSS dimodelkan sebagai grup alternatif lintas platform: tepat satu
+binary dengan nama, versi, dan license yang disetujui harus terpasang per grup.
+License gate juga membaca `pnpm licenses list --prod` dan menolak MPL-2.0 bila
+package yang sama memasuki production dependency graph; regression test
+membuktikan `lightningcss@1.33.0` gagal pada inventory production walaupun exact
+version tersebut diizinkan pada inventory development.
+`brace-expansion@5.0.9` menggantikan 5.0.8 melalui override yang hanya mencakup
+rentang vulnerable `>=5.0.0 <5.0.9`; versi patched tetap memenuhi contract
+`minimatch@10.2.6` dan tidak mengubah dependency runtime aplikasi.
 
 ### Local Infrastructure Images
 
@@ -140,7 +154,7 @@ Sources:
 | `@tanstack/react-query` | 5.101.4 | MIT | Server state | Planned |
 | `@tanstack/react-table` | 8.21.3 | MIT | Admin tables | Planned |
 | `react-hook-form` | 7.83.0 | MIT | Forms | Planned |
-| Zod | 4.4.3 | MIT | Runtime schema | Planned |
+| Zod | 4.4.3 | MIT | Runtime schema; typed config boundary di `packages/observability` | Locked for FND-008 |
 | Motion (`motion`) | 12.42.2 | MIT | Stateful animation | Planned |
 | Recharts | 3.10.1 | MIT | Dashboard/progress charts | Planned |
 | `@daypicker/react` | 10.0.1 | MIT | Calendar/date selection | Planned |
@@ -213,7 +227,7 @@ Source: https://github.com/Nodlik/StPageFlip
 | AWS SDK S3 Client | 3.1096.0 | Apache-2.0 | S3-compatible object storage | Planned |
 | AWS SDK S3 Request Presigner | 3.1096.0 | Apache-2.0 | Presigned upload/download | Planned |
 | openapi-typescript | 7.13.0 | MIT | Frontend API contract generation | Planned |
-| Pino | 10.3.1 | MIT | Structured logging | Planned |
+| Pino | 10.3.1 | MIT | Structured logging melalui adapter `packages/observability` | Locked for FND-008 |
 | nestjs-pino | 4.6.1 | MIT | NestJS logging integration | Planned |
 
 Sources:
@@ -234,7 +248,7 @@ Sources:
 
 | Package/project | Versi teramati | License | Pemakaian | Status |
 | --- | ---: | --- | --- | --- |
-| Vitest | 4.1.10 | MIT | Unit/component tests | Planned |
+| Vitest | 4.1.10 | MIT | Unit/component tests; contract tests `packages/observability` | Locked for FND-008 |
 | Testing Library React | 16.3.2 | MIT | React behavior tests | Planned |
 | Playwright Test | 1.62.0 | Apache-2.0 | Browser E2E | Planned |
 | Supertest | 7.2.2 | MIT | HTTP integration tests | Planned |

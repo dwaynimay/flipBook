@@ -4,8 +4,8 @@
 
 | Field | Value |
 | --- | --- |
-| Date | 31 July 2026 |
-| Tasks | GOV-001, FND-001–FND-007 |
+| Date | 6 August 2026 |
+| Tasks | GOV-001–GOV-003, FND-001–FND-008 |
 | Repository | `D:\Github\flipBook` |
 | Feature code | None |
 
@@ -44,16 +44,28 @@ Registry metadata was queried before the lockfile was generated.
 | Prettier | `3.9.6` | MIT | Supports Node `>=14` |
 | `@types/node` | `24.13.3` | MIT | Matches Node 24 tooling baseline |
 | minimatch (transitive) | `10.2.6` | BlueOak-1.0.0 | Permissive license recorded; tooling only |
+| Pino | `10.3.1` | MIT | Structured logger implementation isolated by `@booklet/observability` |
+| Zod | `4.4.3` | MIT | Runtime parsing for typed observability config; public contracts do not expose Zod types |
+| Vitest | `4.1.10` | MIT | Observability unit and contract tests |
+| Lightning CSS (transitive) | `1.33.0` | MPL-2.0 | Exact development-only Vitest/Vite tooling exception; not exported or distributed by the package |
+| brace-expansion (transitive) | `5.0.9` | MIT | Narrow workspace override closes GHSA-rgw5-rvv9-x895 in the tooling graph |
 
-The installed inventory contains 93 exact package-version records across six
+The installed inventory contains 148 exact package-version records across seven
 observed license identifiers. The canonical allowlist is
 `tooling/scripts/licenses-allowlist.json`. The gate fails when a package,
 version, or license differs and separately rejects all license identifiers
 outside the approved permissive set; a synchronized prohibited record therefore
 still fails. `BlueOak-1.0.0` is accepted only for `minimatch@10.2.6`.
-Platform-specific Turborepo binaries form an exact alternative group covering
-the locked Windows, Linux, and Darwin variants: exactly one approved variant
-must be installed.
+MPL-2.0 is accepted only for the exact development-only Lightning CSS records
+documented in `THIRD_PARTY_LICENSES.md` and requires renewed review if any such
+code is distributed. Platform-specific Turborepo binaries form an exact
+alternative group covering the locked Windows, Linux, and Darwin variants;
+Rolldown and Lightning CSS use equivalent exact platform-alternative groups.
+Exactly one approved variant per group must be installed.
+The production-only inventory contains 103 package-version records across six
+license identifiers. A separate production gate mechanically rejects the exact
+MPL-2.0 Lightning CSS packages if they move from the development graph into the
+production graph.
 
 ## Local Infrastructure Evidence
 
@@ -98,19 +110,41 @@ owns the risk, prohibits staging/production and sensitive data, and requires
 review no later than 31 August 2026 or when a newer official image becomes
 available.
 
+## FND-008 Observability Evidence
+
+| Check | Actual result |
+| --- | --- |
+| Package boundary | `@booklet/observability` is a Node-only workspace package with explicit public exports and generated declarations |
+| Typed config | Zod parses untrusted runtime environment input into the named `ObservabilityConfig` contract and returns typed, non-sensitive validation errors |
+| Structured logging | Pino is normalized behind the nominal `StructuredLogger` class, `LogFields`, and `LogSink`; chained context accumulates with deterministic child overrides and no Pino or Zod type appears in the public API |
+| Correlation ID | Incoming IDs are bounded and character-validated; invalid input receives a generated ID; the nominal value object is revalidated before a system-owned top-level correlation binding is created |
+| Secret redaction | Keyed structured fields cover recursive records, arrays, accumulated child context, normalized key variants, dates, cycles, and prototype-tainted records. Raw Error/AggregateError message, stack, and string-cause content is omitted; error type and recursively safe metadata remain. Unsupported non-plain objects become an explicit safe placeholder. |
+| Tests | Vitest passed 4 test files and 33 tests covering config, nominal/runtime logger and correlation issuance contracts, reflected-constructor rejection, context ownership, logging, safe error projection, and redaction |
+| Dependency security | `brace-expansion@>=5.0.0 <5.0.9` is narrowly overridden to patched `5.0.9`; `corepack pnpm audit --audit-level high` reports no known package vulnerabilities |
+
+Pino and Zod are implementation details of this boundary. Consumers depend on
+project-owned contracts, so third-party logger and schema types cannot leak into
+apps or other packages. The package audit result is separate from the accepted
+local-container advisories recorded for FND-007. Redaction is an enforceable
+defense for keyed structured fields, not a content scanner for interpolated or
+free-form messages; callers must keep sensitive values out of message strings
+and log an approved machine `errorCode` separately when classification is
+needed. The Error projection intentionally does not retain third-party message
+or stack text.
+
 ## Quality-Gate Evidence
 
 | Command | Result |
 | --- | --- |
 | `corepack pnpm install --frozen-lockfile` | Pass; lockfile unchanged |
 | `corepack pnpm run format:check` | Pass |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run lint` | Pass uncached; 3/3 workspace tasks, zero warnings |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run typecheck` | Pass uncached; 3/3 workspace tasks |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run test` | Pass uncached; 4/4 tasks including strict/framework-free compiler fixtures, ESLint boundary contracts, prohibited-license tests, and exact inventory tests |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run build` | Pass uncached; 3/3 workspace tasks |
-| `corepack pnpm run license:check` | Pass; 93 exact installed package-version records |
-| `corepack pnpm exec turbo run build --dry=json` | Pass; 3 valid build tasks |
-| `corepack pnpm exec turbo run typecheck --dry=json` | Pass; ESLint config and repository tooling both depend on `@booklet/typescript-config#typecheck` |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run lint` | Pass uncached; 4/4 workspace tasks, zero warnings |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run typecheck` | Pass uncached; 4/4 workspace tasks |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run test` | Pass uncached; 4/4 workspace test owners; observability contributed 4 Vitest files/33 tests in addition to compiler, ESLint, and license-policy contracts |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run build` | Pass uncached; 4/4 workspace tasks |
+| `corepack pnpm run license:check` | Pass; 148 exact installed package-version records across 7 approved licenses; production inventory 103 records across 6 licenses |
+| `corepack pnpm exec turbo run build --dry=json` | Pass; 4 valid build tasks |
+| `corepack pnpm exec turbo run typecheck --dry=json` | Pass; 4 valid typecheck tasks and workspace dependency ordering preserve the shared TypeScript config boundary |
 | `corepack pnpm audit --audit-level high` | Pass; no known vulnerabilities |
 | Lockfile/hygiene scan | Pass; one root `pnpm-lock.yaml`, no nested Git/env/foreign lockfile |
 
@@ -124,6 +158,8 @@ after the repository added an explicit LF policy in `.gitattributes`.
 | Task | Status | Evidence |
 | --- | --- | --- |
 | GOV-001 | DONE | `APPROVALS.md` and consistent approved statuses |
+| GOV-002 | DONE | `PRODUCT-DECISIONS.md` resolves the MVP product-scope ambiguities and aligns PRD 2.1 |
+| GOV-003 | DONE | ADR-001 through ADR-009 are accepted and linked from the architecture source of truth; ADR-008 remains the narrow local-storage exception |
 | FND-001 | DONE | Actual preflight above, including Docker/WSL verification |
 | FND-002 | DONE | Git, ignore, EditorConfig, and hygiene checks |
 | FND-003 | DONE | pnpm workspace, lockfile, Turbo graph and dry-run |
@@ -131,6 +167,7 @@ after the repository added an explicit LF policy in `.gitattributes`.
 | FND-005 | DONE | Flat ESLint config and contracts for nested/generic/union JSDoc `any`, wrapped as/angle-bracket double assertions, page-flip isolation, browser API, all-workspace deep imports, and root/subpath dependency boundaries |
 | FND-006 | DONE | Local gates pass and hosted clean-checkout Quality run `30553017485` passed |
 | FND-007 | DONE | Reproducibility, loopback isolation, clean bootstrap, persistence, license record, ADR-008, and time-bounded Product Owner CVE risk disposition verified |
+| FND-008 | DONE | Typed config, nominal structured logger/correlation boundaries with runtime issuance guards, accumulated context, safe Error projection, keyed structured-field redaction, public type isolation, 4 files/33 tests, development plus production license gates, and clean package audit verified |
 
 ## Known Risks and Deferred Work
 
@@ -144,8 +181,13 @@ after the repository added an explicit LF policy in `.gitattributes`.
   scripts will be added only when an owning app/package implements them.
 - TypeScript 7 remains deferred until `typescript-eslint` declares a compatible
   peer range and the upgrade passes a dedicated dependency review.
-- Product decisions in GOV-002 and architecture ADRs in GOV-003 remain outside
-  this approved batch.
+- Standing Product Owner authorization removes routine approval checkpoints for
+  dependency-ordered MVP tasks. It does not waive architecture, security,
+  privacy, dependency/license, quality, production-action, or scope-expansion
+  gates recorded in `AGENTS.md` and `APPROVALS.md`.
+- This record closes the repository foundation only. It is not evidence that
+  feature acceptance, staging, release, or production-readiness gates have
+  passed.
 
 ## Sources Consulted
 

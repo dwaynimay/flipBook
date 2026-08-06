@@ -282,7 +282,7 @@ Wrapper publik saat ini tidak mendeklarasikan React peer dependency dan mengguna
 
 - content schema + block renderer;
 - Tiptap headless untuk authoring;
-- Uppy untuk image/PDF;
+- Uppy untuk image;
 - responsive image primitives.
 
 **Impeccable contract**
@@ -290,7 +290,7 @@ Wrapper publik saat ini tidak mendeklarasikan React peer dependency dan mengguna
 - satu renderer dipakai preview dan reader;
 - sanitized rich text;
 - image dimensions/aspect ratio tersimpan;
-- PDF bukan default reading path dan selalu memiliki alternatif ringkas/unduhan.
+- PDF import, block, embed, dan reading path ditunda setelah MVP.
 
 ### Module 9 — Mitos vs Fakta
 
@@ -407,14 +407,13 @@ Tidak menjadi foundation. Hanya komponen MIT yang telah diaudit boleh diadaptasi
 
 ### Module 15 — Search
 
-**Selected**
+**Deferred from MVP**
 
-- PostgreSQL full-text search;
-- `pg_trgm` untuk typo-tolerant title/tag search;
-- cmdk untuk command/search presentation;
-- TanStack Query dengan cancellation/debounce.
+Filter kategori dasar dan navigasi daftar isi tetap termasuk MVP. PostgreSQL
+full-text search, `pg_trgm`, cmdk search presentation, ranking, dan snippet
+ditunda sampai kebutuhan search disetujui setelah MVP.
 
-**Impeccable contract**
+**Contract ketika diaktifkan**
 
 - ranking dilakukan server;
 - query minimum dan result limit eksplisit;
@@ -429,14 +428,14 @@ Tidak menjadi foundation. Hanya komponen MIT yang telah diaudit boleh diadaptasi
 - Sonner untuk toast transient;
 - Radix Alert Dialog untuk confirmation;
 - browser Notification API untuk reminder aktif;
-- persisted notification records di PostgreSQL.
+- dashboard due-reminder state dari schedule/adherence domain.
 
 **Impeccable contract**
 
 - toast tidak dipakai untuk error yang membutuhkan tindakan lama;
 - permission state typed;
 - no duplicate toast dari rerender/effect;
-- user dapat membaca notification history;
+- persisted notification inbox/history ditunda setelah MVP;
 - web push adalah roadmap terpisah.
 
 ### Module 17 — Admin Panel
@@ -586,7 +585,7 @@ Package reusable wajib:
 - chart keyboard/text summary;
 - contrast;
 - mobile 360 px;
-- dark mode token parity.
+- light-theme token completeness; dark mode ditunda setelah MVP.
 
 Tidak ada library critical yang dinyatakan “locked” sebelum spike terkait lulus.
 

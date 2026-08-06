@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 
-import { parseLicenseAllowlist, validateExactLicenseInventory } from "./license-policy.mjs";
+import {
+  parseLicenseAllowlist,
+  validateExactLicenseInventory,
+  validateProductionLicenseInventory,
+} from "./license-policy.mjs";
 
 const expected = [
   {
@@ -72,6 +76,37 @@ assert.throws(
     ),
   /approved only for minimatch@10\.2\.6/u,
 );
+
+const approvedLightningCss = [{ license: "MPL-2.0", name: "lightningcss", version: "1.33.0" }];
+
+assert.deepEqual(validateExactLicenseInventory(approvedLightningCss, approvedLightningCss), {
+  licenseCount: 1,
+  packageCount: 1,
+});
+
+assert.throws(
+  () => validateProductionLicenseInventory(approvedLightningCss),
+  /Development-only MPL-2\.0 dependency entered the production inventory/u,
+);
+
+assert.deepEqual(
+  validateProductionLicenseInventory([{ license: "MIT", name: "pino", version: "10.3.1" }]),
+  {
+    licenseCount: 1,
+    packageCount: 1,
+  },
+);
+
+for (const unapprovedMplRecord of [
+  { license: "MPL-2.0", name: "lightningcss", version: "1.34.0" },
+  { license: "MPL-2.0", name: "lightningcss-unknown", version: "1.33.0" },
+  { license: "MPL-2.0", name: "other-package", version: "1.33.0" },
+]) {
+  assert.throws(
+    () => validateExactLicenseInventory([unapprovedMplRecord], [unapprovedMplRecord]),
+    /approved only for the exact Lightning CSS 1\.33\.0/u,
+  );
+}
 
 assert.throws(
   () => validateExactLicenseInventory(expected.slice(0, 1), expected),

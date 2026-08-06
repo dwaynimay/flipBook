@@ -465,13 +465,14 @@ ADR-008; production tetap memakai provider S3-compatible yang direview terpisah.
 Semua image baru atau update wajib melewati Container Image Update Gate dalam
 `THIRD_PARTY_LICENSES.md`; digest tidak menyiratkan security approval.
 
-## 16. Architecture Decision Records yang Perlu Dibuat
+## 16. Architecture Decision Records
 
-- ADR-001: pnpm workspace + Turborepo
-- ADR-002: modular monolith
-- ADR-003: versioned JSON content schema
-- ADR-004: immutable published revision
-- ADR-005: flipbook adapter dan vertical fallback
-- ADR-006: cookie-based refresh session
-- ADR-007: reminder MVP limitation
-- ADR-008: MinIO local dan S3-compatible production — accepted
+- [ADR-001: pnpm workspace + Turborepo](adr/ADR-001-pnpm-workspace-and-turborepo.md) — accepted
+- [ADR-002: modular monolith](adr/ADR-002-modular-monolith.md) — accepted
+- [ADR-003: versioned JSON content schema](adr/ADR-003-versioned-json-content-schema.md) — accepted
+- [ADR-004: immutable published revision](adr/ADR-004-immutable-published-revisions.md) — accepted
+- [ADR-005: flipbook adapter dan vertical fallback](adr/ADR-005-flipbook-adapter-and-vertical-fallback.md) — accepted
+- [ADR-006: cookie-based refresh session](adr/ADR-006-cookie-based-refresh-session.md) — accepted
+- [ADR-007: reminder MVP limitation](adr/ADR-007-reminder-mvp-limitation.md) — accepted
+- [ADR-008: MinIO local dan S3-compatible production](adr/ADR-008-local-object-storage.md) — accepted
+- [ADR-009: REST dan OpenAPI contract](adr/ADR-009-rest-openapi-contract.md) — accepted

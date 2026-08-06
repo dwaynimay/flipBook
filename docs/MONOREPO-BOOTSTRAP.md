@@ -2,11 +2,12 @@
 
 ## Status
 
-Approved. Fondasi root, shared config, hosted CI, dan local infrastructure pada
-FND-001 sampai FND-007 selesai. Risiko CVE pada exact-pinned PostgreSQL dan
-MinIO diterima sementara oleh Product Owner hanya untuk loopback local
-development, dengan review paling lambat 31 Agustus 2026 atau saat image resmi
-baru tersedia. Hasil command aktual dicatat di
+Approved. GOV-002 dan GOV-003 telah mengunci keputusan produk serta ADR awal;
+fondasi root, shared config, hosted CI, local infrastructure, dan
+`@booklet/observability` pada FND-001 sampai FND-008 selesai. Risiko CVE pada
+exact-pinned PostgreSQL dan MinIO diterima sementara oleh Product Owner hanya
+untuk loopback local development, dengan review paling lambat 31 Agustus 2026
+atau saat image resmi baru tersedia. Hasil command aktual dicatat di
 `FOUNDATION-VERIFICATION.md`.
 
 ## 1. Pilihan
@@ -132,7 +133,14 @@ packages:
   - "apps/*"
   - "packages/*"
   - "tooling/*"
+
+overrides:
+  "brace-expansion@>=5.0.0 <5.0.9": "5.0.9"
 ```
+
+Override sempit tersebut menutup GHSA-rgw5-rvv9-x895 pada tooling graph dan
+tidak boleh diperluas tanpa dependency review. `corepack pnpm audit
+--audit-level high` harus tetap lulus.
 
 Semua internal dependency menggunakan bentuk:
 
@@ -300,6 +308,7 @@ Gunakan scope tunggal:
 @booklet/quiz-engine
 @booklet/ui
 @booklet/database
+@booklet/observability
 ```
 
 Contoh package library:
@@ -342,13 +351,18 @@ Ini hanya template kontrak package, bukan instruksi untuk membuat seluruh packag
 7. Jalankan `corepack pnpm install`.
 8. Commit sebagai `chore(repo): initialize workspace foundation`.
 
-### Step B — Shared Config
+### Step B — Shared Config dan Observability Foundation
 
 1. Scaffold `config-typescript`.
 2. Scaffold `config-eslint`.
 3. Tambah quality gate scripts.
 4. Pastikan setiap shared-config package menjalankan typecheck miliknya.
-5. Commit terpisah.
+5. Scaffold `packages/observability` dengan typed config, structured logger
+   adapter, correlation ID, dan recursive redaction untuk keyed structured
+   fields; secret tidak boleh ditempatkan pada free-form message.
+6. Pastikan public contract tidak mengekspor type Pino/Zod dan seluruh boundary
+   mempunyai unit tests.
+7. Commit terpisah.
 
 ### Step C — Contract First
 
@@ -463,7 +477,14 @@ Phase 0 dianggap selesai jika repository memiliki:
 - struktur folder yang disetujui;
 - root workspace config;
 - shared TypeScript/ESLint config;
+- typed observability foundation dengan third-party type isolation;
 - CI install/lint/typecheck/test foundation yang benar-benar mengeksekusi owner;
 - dokumentasi PRD dan architecture;
 - ADR awal;
 - tidak ada fitur aplikasi yang diimplementasikan.
+
+Hasil closeout Phase 0A, termasuk workspace owner, test, installed-license
+inventory, audit, dan command aktual, hanya dicatat secara canonical di
+`FOUNDATION-VERIFICATION.md` agar angka ephemeral tidak tersebar dan menjadi
+stale. Standing Product Owner authorization tidak menggantikan architecture,
+security, privacy, dependency/license, atau quality gate.

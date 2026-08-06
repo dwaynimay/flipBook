@@ -4,10 +4,11 @@
 
 | Metadata | Nilai |
 | --- | --- |
-| Versi | 2.0 |
+| Versi | 2.1 |
 | Status | Approved Baseline |
 | Tanggal | 28 Juli 2026 |
 | Tanggal persetujuan | 30 Juli 2026 |
+| Pembaruan scope GOV-002 | 6 Agustus 2026 |
 | Bahasa produk | Bahasa Indonesia |
 | Produk awal | Edukasi Anemia dan Tablet Tambah Darah (TTD) |
 | Platform | Web responsif |
@@ -26,6 +27,7 @@ Keputusan produk untuk MVP:
 - Konten halaman disimpan sebagai JSON berversi, bukan HTML mentah.
 - Booklet yang diterbitkan menggunakan revision/snapshot agar perubahan editor tidak merusak sesi baca aktif.
 - Reminder browser pada MVP bersifat best-effort. Aplikasi tidak menjanjikan notifikasi ketika browser dan aplikasi sepenuhnya ditutup.
+- Reset password, pencarian teks global, riwayat notifikasi persisten, dukungan PDF, dan dark mode ditunda setelah MVP sesuai `PRODUCT-DECISIONS.md`.
 
 ## 2. Latar Belakang dan Masalah
 
@@ -164,7 +166,7 @@ Kebutuhan:
 - login email dan password untuk admin dan learner;
 - logout;
 - refresh session yang aman;
-- forgot/reset password dapat ditunda ke rilis MVP berikutnya bila waktu TA terbatas;
+- forgot/reset password ditunda ke rilis setelah MVP;
 - rate limiting untuk endpoint login;
 - role-based access untuk endpoint admin.
 

@@ -6,30 +6,23 @@
 | --- | --- |
 | Status | Approved for execution |
 | Tanggal persetujuan | 30 Juli 2026 |
-| Dasar produk | PRD v2.0 |
+| Standing authorization | 6 Agustus 2026 |
+| Dasar produk | PRD v2.1 |
 | Strategi delivery | Contract-first, vertical slice, dependency-gated |
 | Unit eksekusi | Satu task pada satu package/app boundary |
 | Estimasi kalender | Belum ditetapkan; kapasitas tim dan deadline belum tersedia |
 
 ## 1. Keputusan Kesiapan
 
-Blueprint produk dan arsitektur **cukup untuk memulai repository foundation**.
-Implementasi fitur belum boleh dimulai sebelum Product Owner:
+Blueprint produk, arsitektur, keputusan GOV-002/GOV-003, dan repository
+foundation telah disetujui. Standing authorization Product Owner mengizinkan
+eksekusi roadmap MVP menurut urutan dependency dalam `TASKS.md` tanpa checkpoint
+persetujuan rutin.
 
-1. menyetujui baseline PRD, arsitektur, ecosystem matching, dan `AGENTS.md`;
-2. menyelesaikan keputusan scope pada Bagian 10;
-3. menyetujui dependency spike sebagai gate sebelum library kritis dikunci.
-
-Kondisi workspace saat planning dibuat:
-
-- repository masih berisi dokumentasi dan artefak Graphify;
-- root belum menjadi Git repository;
-- Node.js `v24.18.0`, Corepack `0.35.0`, dan pnpm `11.9.0` tersedia;
-- Docker belum tersedia;
-- versi toolchain pada draft bootstrap wajib divalidasi ulang sebelum lockfile dibuat.
-
-Kondisi tersebut bukan alasan untuk mengubah arsitektur. Semuanya menjadi
-preflight task pada Phase 0.
+Library kritis tetap tidak boleh dikunci sebelum spike, dependency/license
+review, compatibility proof, dan contract test terkait lulus. Kondisi toolchain,
+infrastruktur, task closure, serta hasil command aktual tidak diduplikasi di
+dokumen ini; bukti canonical berada di `FOUNDATION-VERIFICATION.md`.
 
 ## 2. Sources of Truth
 
@@ -398,21 +391,32 @@ dependency/license audit, dan pemeriksaan pola terlarang.
    dan blocker.
 6. Task downstream tidak dimulai bila exit criteria phase sebelumnya gagal.
 
-## 10. Keputusan Product Owner yang Masih Dibutuhkan
+## 10. Keputusan Product Owner dan Standing Authorization
 
-Sebelum Phase 1:
+GOV-002 dan GOV-003 telah menyelesaikan keputusan baseline:
 
-- setujui seluruh baseline document dan ubah status draft;
-- putuskan apakah forgot/reset password masuk MVP atau rilis berikutnya;
-- tentukan target deployment, object storage production, dan error tracking;
-- tetapkan consent/retention/delete-data policy minimum.
+- password reset/account recovery, full-text search, persisted notification
+  history, PDF, dan dark mode berada di luar MVP;
+- filter kategori, due-reminder dashboard, vertical reader, dan tema terang
+  berbasis design token tetap termasuk MVP;
+- deployment memakai static Vite web/admin, containerized NestJS API, managed
+  PostgreSQL, dan provider S3-compatible yang direview sebelum release;
+- observability memakai provider-neutral typed boundary sekarang; vendor error
+  tracking dipilih sebelum production;
+- retention engineering baseline dan production legal/privacy review gate berada
+  di `PRODUCT-DECISIONS.md`;
+- API memakai REST JSON `/api/v1`, OpenAPI yang dihasilkan NestJS, dan generated
+  frontend contracts sesuai ADR-009;
+- ADR-001 sampai ADR-009 berstatus accepted. ADR-008 tetap merupakan exception
+  MinIO development lokal yang sempit, bukan approval production.
 
-Sebelum Phase 2/4:
+Standing authorization mengizinkan task MVP dependency-ordered dilanjutkan
+tanpa meminta approval rutin. Otorisasi ini tidak menghapus architecture,
+security, privacy, dependency/license, quality, data-retention, dan
+production-action gates. Credential eksternal, tindakan production, konflik
+source of truth, risiko material baru, atau perluasan scope di luar MVP tetap
+harus dihentikan pada boundary terkait sampai prasyaratnya dipenuhi.
 
-- konfirmasi apakah full-text/typo-tolerant search masuk MVP atau hanya filter;
-- konfirmasi persisted notification history;
-- konfirmasi PDF hanya sebagai attachment/download atau tetap post-MVP;
-- konfirmasi apakah dark mode adalah requirement atau hanya token readiness.
-
-Keputusan tersebut tidak menghalangi repository foundation, tetapi menghalangi
-commitment scope pada phase terkait.
+Fitur deferred hanya dapat masuk MVP melalui perubahan PRD/decision log dengan
+acceptance criteria, owner, privacy/security impact, dependency review, dan
+verification plan yang eksplisit.
