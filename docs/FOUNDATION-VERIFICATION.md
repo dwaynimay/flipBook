@@ -5,9 +5,9 @@
 | Field | Value |
 | --- | --- |
 | Date | 9 August 2026 |
-| Tasks | GOV-001–GOV-003, FND-001–FND-008, CON-001–CON-002 |
+| Tasks | GOV-001–GOV-003, FND-001–FND-008, CON-001–CON-003 |
 | Repository | `D:\Github\flipBook` |
-| Feature code | Framework-free content contract only; no application composition |
+| Feature code | Framework-free content contracts plus NestJS transport/contract composition; no product-domain feature implementation yet |
 
 ## Environment Preflight
 
@@ -50,7 +50,14 @@ Registry metadata was queried before the lockfile was generated.
 | Lightning CSS (transitive) | `1.33.0` | MPL-2.0 | Exact development-only Vitest/Vite tooling exception; not exported or distributed by the package |
 | brace-expansion (transitive) | `5.0.9` | MIT | Narrow workspace override closes GHSA-rgw5-rvv9-x895 in the tooling graph |
 
-The installed inventory contains 148 exact package-version records across seven
+The 148-record overall and 103-record production counts in this dependency
+decision and the later FND-008/CON-001 evidence are historical closure snapshots
+from before CON-003 added the Nest transport toolchain. They are preserved as
+dated evidence, not presented as the current inventory. The canonical current
+inventory is the 319-record overall and 217-record production result in
+Quality-Gate Evidence below.
+
+The historical installed inventory contains 148 exact package-version records across seven
 observed license identifiers. The canonical allowlist is
 `tooling/scripts/licenses-allowlist.json`. The gate fails when a package,
 version, or license differs and separately rejects all license identifiers
@@ -62,7 +69,7 @@ code is distributed. Platform-specific Turborepo binaries form an exact
 alternative group covering the locked Windows, Linux, and Darwin variants;
 Rolldown and Lightning CSS use equivalent exact platform-alternative groups.
 Exactly one approved variant per group must be installed.
-The production-only inventory contains 103 package-version records across six
+The historical production-only inventory contains 103 package-version records across six
 license identifiers. A separate production gate mechanically rejects the exact
 MPL-2.0 Lightning CSS packages if they move from the development graph into the
 production graph.
@@ -163,19 +170,34 @@ spread/orientation mapping, not arbitrary page styling.
 | Isolation | Migration and fallback preparation have no React, NestJS, Prisma, Node API, logging, or browser dependency. Observability is typed data returned to the caller rather than an implicit side effect. |
 | Tests | Vitest passed 2 files and 71 tests. The 28 CON-002 cases cover exact v0-to-v1 migration, all known block seams, v1 idempotence, invalid version/target classes, no-mutation, final validation, dangerous keys, publication strictness, ordered unknown replacement, hostile-prop erasure, label sanitization, strict unknown envelopes, malformed known/unknown rejection with source-index preservation, duplicate IDs, the shared page block limit, and evidence-preserving project-owned throwing APIs. |
 
+## CON-003 API Contract Evidence
+
+| Check | Actual result |
+| --- | --- |
+| Runtime boundary | NestJS 11.1.28 uses Express under the versioned `/api/v1` prefix. The only production route in this task is the real process-readiness `GET /api/v1/health`; contract harness routes exist only in test source and are absent from the generated document. |
+| Request ID | Middleware resolves bounded incoming `X-Request-Id` values through `@booklet/observability`, replaces invalid values, stores the nominal correlation value by request identity, and returns the ID on the response. It is registered before Nest's official Express JSON/urlencoded body parsers, so malformed JSON retains the same header/body request ID. OpenAPI documents the header on success and foundation error responses plus a reusable component. |
+| Error envelope | `ApiExceptionFilter` emits the project-owned `{ error: { code, message, requestId, details? } }` shape. Unknown and third-party exceptions become stable public codes/messages. `ApiProblem` has fixed factories, a module-private construction token, an issuance registry checked by the filter, and frozen invariant state. Its hostile `unknown` details boundary accepts only a dense, unaugmented array of at most 32 fresh allowlisted records using safe field paths plus the closed `invalid_value | length_out_of_range | must_be_string | unknown_field` reason registry. Rejected values, prototype forgeries, arbitrary messages/details, stacks, and internal responses are never reflected. Unexpected failures emit correlated structured evidence containing only a stable code and error kind. |
+| Idempotency | `Idempotency-Key` is a reusable OpenAPI parameter and an API-owned 8-128 character parser, pipe, parameter decorator, and operation decorator. It is proven on a test-only mutation harness and is not attached to a fake production endpoint. |
+| OpenAPI generation | NestJS controller/DTO metadata is serialized with explicit locale-independent UTF-16 code-unit ordering without calling `listen()`. Canonical `openapi.json` SHA-256 is `65911ca0f3ee15499a787f9349c93e16bead77d92041f63831148178e3e0ff7e`. Production paths contain only `/api/v1/health`. |
+| Generated frontend contract | `openapi-typescript@7.13.0` generates `packages/api-contracts/src/generated.ts`; SHA-256 is `5ddf0d34bbea6307298a6789ed771c7b922f70091ce02d01c7e297a809bbf374`. The normal test graph and CI build current Nest source, generate two independent OpenAPI/type pairs in temporary directories, compare them for determinism, and byte-compare both committed artifacts without mutating the worktree. Type tests compile under TypeScript 6.0.3, preserve the exact error-reason union, and contain no NestJS, Prisma, class-validator, or `any`. |
+| Generator peer isolation | Because `openapi-typescript@7.13.0` declares TypeScript `^5.x`, exact TypeScript 5.9.3 exists only in `tooling/openapi-generator`. No authored API or package source compiles under it; `apps/api` and `packages/api-contracts` explicitly use TypeScript 6.0.3. Install completes without an unmet-peer warning. |
+| Dependency security | Scarf's transitive telemetry install script is explicitly denied. Narrow vulnerable-range overrides select `brace-expansion@2.1.4`, `js-yaml@4.3.1`, and `js-yaml@5.2.2`; package audit reports no known vulnerabilities. |
+| Tests | API passed 6 files/42 tests, generated contracts passed 1 file/2 tests, and full source-to-generated determinism/drift passed 1 test. Runtime coverage includes readiness, retained/replaced/malformed-JSON request IDs, reflective/prototype-forgery rejection, single-read hostile detail containers and records, overridden collection methods, sparse/undefined/augmented/oversized arrays, throwing accessors, revoked proxies, deterministic 32-detail truncation for large class-validator failures, closed problem factories, allowlisted validation failures, idempotency rejection/acceptance, unknown-error non-leakage, canonical ordering, complete OpenAPI response headers, strict PORT parsing before application creation, failed-listen cleanup, and post-creation configuration cleanup. |
+
 ## Quality-Gate Evidence
 
 | Command | Result |
 | --- | --- |
 | `corepack pnpm install --frozen-lockfile` | Pass; lockfile unchanged |
 | `corepack pnpm run format:check` | Pass |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run lint` | Pass uncached; 5/5 workspace tasks, zero warnings |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run typecheck` | Pass uncached; 5/5 workspace tasks |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run test` | Pass uncached; 7/7 task graph owners. Content schema passed 2 files/71 tests and observability passed 4 files/33 tests. |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run build` | Pass uncached; 5/5 workspace tasks |
-| `corepack pnpm run license:check` | Pass; 148 exact installed package-version records across 7 approved licenses; production inventory 103 records across 6 licenses |
-| `corepack pnpm exec turbo run build --dry=json` | Pass; 5 valid build tasks |
-| `corepack pnpm exec turbo run typecheck --dry=json` | Pass; 5 valid typecheck tasks and workspace dependency ordering preserve the shared TypeScript config boundary |
+| `corepack pnpm run contracts:check` | Pass; current Nest metadata generated twice into temporary outputs and both committed artifacts matched byte-for-byte |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run lint` | Pass uncached; 8/8 workspace tasks, zero warnings |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run typecheck` | Pass uncached; 8/8 workspace tasks |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run test` | Pass uncached; 11/11 task graph owners. API passed 6 files/42 tests, API contracts 1 file/2 tests, generator source-drift 1 test, content schema 2 files/71 tests, and observability 4 files/33 tests. |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run build` | Pass uncached; 8/8 workspace tasks |
+| `corepack pnpm run license:check` | Pass; 319 exact installed package-version records across 10 approved licenses; production inventory 217 records across 8 licenses |
+| `corepack pnpm exec turbo run build --dry=json` | Pass; 8 valid build tasks |
+| `corepack pnpm exec turbo run typecheck --dry=json` | Pass; 8 valid typecheck tasks; authored API and contract workspaces remain on shared TypeScript 6 config |
 | `corepack pnpm audit --audit-level high` | Pass; no known vulnerabilities |
 | Lockfile/hygiene scan | Pass; one root `pnpm-lock.yaml`, no nested Git/env/foreign lockfile |
 
@@ -201,6 +223,7 @@ after the repository added an explicit LF policy in `.gitattributes`.
 | FND-008 | DONE | Typed config, nominal structured logger/correlation boundaries with runtime issuance guards, accumulated context, safe Error projection, keyed structured-field redaction, public type isolation, 4 files/33 tests, development plus production license gates, and clean package audit verified |
 | CON-001 | DONE | Framework-free PageDocument v1 contract, ten strict block variants, required media geometry, legal branded constructors, bounded Proxy-safe JSON trust preflight/clone, stable project-owned validation surface, explicit schema-output mapping, exhaustive `never`, deterministic clean build, declaration isolation, and 1 file/43 tests verified |
 | CON-002 | DONE | Deterministic adjacent-step v0 draft/import-to-v1 migration, exhaustive per-known-block seams, strict final validation, typed migration failures, current-version idempotence, and reader-only inert unknown-block fallback with safe evidence; 2 files/71 total package tests verified |
+| CON-003 | DONE | Versioned NestJS API foundation, real readiness route, pre-parser correlation/request-ID propagation, closed non-leaking error registry, strict DTO/runtime-config boundaries, reusable idempotency contract, network-free canonical OpenAPI, source-to-generated CI drift gate, isolated generator peer toolchain, and TypeScript 6 frontend contracts verified |
 
 ## Known Risks and Deferred Work
 
@@ -209,9 +232,9 @@ after the repository added an explicit LF policy in `.gitattributes`.
   Product Owner owns the risk. Staging, production, non-loopback exposure, and
   sensitive data are prohibited. Review is mandatory no later than 31 August
   2026 or when a newer official image becomes available.
-- Root scripts intentionally expose only real owners: build, format,
-  format-check, license-check, lint, test, and typecheck. Dev, clean, and E2E
-  scripts will be added only when an owning app/package implements them.
+- Root scripts expose only real owners, including deterministic
+  `contracts:generate`. Root dev, clean, and E2E scripts will be added only
+  when their cross-workspace orchestration has a real owner.
 - TypeScript 7 remains deferred until `typescript-eslint` declares a compatible
   peer range and the upgrade passes a dedicated dependency review.
 - Standing Product Owner authorization removes routine approval checkpoints for
@@ -237,6 +260,9 @@ after the repository added an explicit LF policy in `.gitattributes`.
   https://eslint.org/docs/latest/use/command-line-interface
 - typescript-eslint supported TypeScript range:
   https://typescript-eslint.io/users/dependency-versions
+- NestJS OpenAPI generation: https://docs.nestjs.com/openapi/introduction
+- openapi-typescript CLI and Node API: https://openapi-ts.dev/cli and
+  https://openapi-ts.dev/node
 - Registry version/license/engine/peer metadata: `npm view` against the
   official npm registry.
 - Blue Oak Model License 1.0.0:

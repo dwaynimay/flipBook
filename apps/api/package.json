@@ -1,0 +1,39 @@
+{
+  "name": "@booklet/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "pnpm run clean && tsc -p tsconfig.build.json",
+    "clean": "node ../../tooling/scripts/clean-workspace-output.mjs apps/api/dist",
+    "lint": "eslint . --max-warnings=0",
+    "openapi:generate": "pnpm run build && node dist/openapi/generate.js",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@booklet/observability": "workspace:*",
+    "@nestjs/common": "11.1.28",
+    "@nestjs/core": "11.1.28",
+    "@nestjs/platform-express": "11.1.28",
+    "@nestjs/swagger": "11.4.6",
+    "class-transformer": "0.5.1",
+    "class-validator": "0.15.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@booklet/eslint-config": "workspace:*",
+    "@booklet/typescript-config": "workspace:*",
+    "@types/express": "5.0.6",
+    "@types/node": "24.13.3",
+    "@types/supertest": "7.2.1",
+    "eslint": "10.8.0",
+    "supertest": "7.2.2",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
+}

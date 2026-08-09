@@ -43,6 +43,10 @@ jobs:
         shell: pwsh
         run: corepack pnpm run format:check
 
+      - name: Verify generated API contracts
+        shell: pwsh
+        run: corepack pnpm run contracts:check
+
       - name: Lint with zero warnings
         shell: pwsh
         run: corepack pnpm run lint

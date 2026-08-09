@@ -37,6 +37,7 @@ ID task stabil dan dipakai pada commit, PR, ADR, serta laporan verifikasi.
 | FND-008 | DONE | `@booklet/observability`: typed config, isolated logger contracts, correlation ID, dan keyed structured-field redaction lulus; hasil command dan hitungan canonical berada di `FOUNDATION-VERIFICATION.md` |
 | CON-001 | DONE | `@booklet/content-schema`: `PageDocument` v1, sepuluh MVP block variants, legal branded-value constructors, strict token/preset/media-geometry fields, JSON-safe trust preflight, stable project-owned validation results, cross-field invariants, dan exhaustive contract lulus; bukti berada di `FOUNDATION-VERIFICATION.md` |
 | CON-002 | DONE | `@booklet/content-schema`: deterministic adjacent-step migrator untuk explicit pre-v1 draft/import, strict final v1 validation, dan reader-only inert unknown-block fallback dengan typed evidence lulus; bukti berada di `FOUNDATION-VERIFICATION.md` |
+| CON-003 | DONE | NestJS `/api/v1` foundation, project-owned error/request-ID/idempotency contracts, network-free deterministic OpenAPI, dan generated TypeScript 6 frontend contracts lulus; bukti berada di `FOUNDATION-VERIFICATION.md` |
 
 ## Task Fields
 

@@ -9,6 +9,8 @@
   },
   "scripts": {
     "build": "turbo run build",
+    "contracts:check": "pnpm --filter @booklet/api run build && pnpm --filter @booklet/openapi-generator run check",
+    "contracts:generate": "pnpm --filter @booklet/api run openapi:generate && pnpm --filter @booklet/openapi-generator run generate",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "license:check": "node tooling/scripts/check-licenses.mjs",

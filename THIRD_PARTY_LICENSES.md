@@ -5,7 +5,7 @@
 | Metadata | Nilai |
 | --- | --- |
 | Status | Approved baseline — dependencies locked; FND-007 local image risk accepted temporarily |
-| Tanggal verifikasi | 6 Agustus 2026 |
+| Tanggal verifikasi | 9 Agustus 2026 |
 | Scope | Dependency terpasang dan kandidat dependency produk |
 | Release authority | Lockfile dan generated notice bundle |
 
@@ -20,10 +20,13 @@ Tidak semua package di bagian “evaluated/conditional” akan dipasang.
 ### Diizinkan
 
 - MIT
+- 0BSD
 - Apache-2.0
 - BSD-2-Clause
 - BSD-3-Clause
 - ISC
+- Python-2.0
+- CC0-1.0 when selected through an explicit permissive dual-license option
 - BlueOak-1.0.0 hanya untuk `minimatch@10.2.6`
 - PostgreSQL License
 
@@ -210,8 +213,8 @@ Source: https://github.com/Nodlik/StPageFlip
 | Package/project | Versi teramati | License | Pemakaian | Status |
 | --- | ---: | --- | --- | --- |
 | NestJS Core | 11.1.28 | MIT | API framework | Locked major |
-| NestJS Platform Express | 11.1.28 | MIT | HTTP adapter | Planned |
-| NestJS Swagger | 11.4.6 | MIT | OpenAPI generation | Planned |
+| NestJS Platform Express | 11.1.28 | MIT | HTTP adapter | Locked for CON-003 |
+| NestJS Swagger | 11.4.6 | MIT | OpenAPI generation | Locked for CON-003 |
 | NestJS JWT | 11.0.2 | MIT | Token service | Planned |
 | NestJS Passport | 11.0.5 | MIT | Auth integration | Planned |
 | NestJS Schedule | 6.1.3 | MIT | MVP schedule scan | Planned |
@@ -222,11 +225,14 @@ Source: https://github.com/Nodlik/StPageFlip
 | node-postgres (`pg`) | 8.22.0 | MIT | PostgreSQL driver/adapter | Planned if required |
 | argon2 | 0.45.1 | MIT | Password hashing | Planned |
 | Helmet | 8.3.0 | MIT | HTTP security headers | Planned |
-| class-validator | 0.15.1 | MIT | NestJS request DTO validation | Planned |
-| class-transformer | 0.5.1 | MIT | NestJS DTO transform | Planned |
+| class-validator | 0.15.1 | MIT | NestJS request DTO validation | Locked for CON-003 |
+| class-transformer | 0.5.1 | MIT | NestJS DTO transform | Locked for CON-003 |
 | AWS SDK S3 Client | 3.1096.0 | Apache-2.0 | S3-compatible object storage | Planned |
 | AWS SDK S3 Request Presigner | 3.1096.0 | Apache-2.0 | Presigned upload/download | Planned |
-| openapi-typescript | 7.13.0 | MIT | Frontend API contract generation | Planned |
+| openapi-typescript | 7.13.0 | MIT | Frontend API contract generation | Locked in isolated generator tooling |
+| TypeScript | 5.9.3 | Apache-2.0 | Peer runtime for `openapi-typescript` only | Locked in isolated generator tooling; never compiles authored app/package code |
+| reflect-metadata | 0.2.2 | Apache-2.0 | NestJS decorator metadata runtime | Locked for CON-003 |
+| RxJS | 7.8.2 | Apache-2.0 | NestJS runtime peer | Locked for CON-003 |
 | Pino | 10.3.1 | MIT | Structured logging melalui adapter `packages/observability` | Locked for FND-008 |
 | nestjs-pino | 4.6.1 | MIT | NestJS logging integration | Planned |
 
@@ -244,6 +250,15 @@ Sources:
 - https://openapi-ts.dev/
 - https://getpino.io/
 
+`openapi-typescript@7.13.0` declares `typescript: ^5.x`. The exact TypeScript
+5.9.3 peer is therefore contained in `tooling/openapi-generator`; API and
+generated-contract source continue to compile with the monorepo's exact
+TypeScript 6.0.3. This is neither a compiler downgrade nor a peer override.
+`@scarf/scarf@1.4.0` arrives transitively through NestJS Swagger's UI assets;
+its install script is explicitly disabled, so dependency installation does not
+run Scarf telemetry. Narrow overrides select patched `js-yaml@4.3.1`,
+`js-yaml@5.2.2`, and `brace-expansion@2.1.4` only for vulnerable ranges.
+
 ## 7. Planned Quality Dependencies
 
 | Package/project | Versi teramati | License | Pemakaian | Status |
@@ -251,7 +266,7 @@ Sources:
 | Vitest | 4.1.10 | MIT | Unit/component tests; contracts for observability and content schema | Locked for FND-008 and CON-001 |
 | Testing Library React | 16.3.2 | MIT | React behavior tests | Planned |
 | Playwright Test | 1.62.0 | Apache-2.0 | Browser E2E | Planned |
-| Supertest | 7.2.2 | MIT | HTTP integration tests | Planned |
+| Supertest | 7.2.2 | MIT | HTTP integration tests | Locked for CON-003 |
 | ESLint | 10.8.0 | MIT | Static analysis | Locked |
 | Prettier | 3.9.6 | MIT | Formatting | Locked |
 

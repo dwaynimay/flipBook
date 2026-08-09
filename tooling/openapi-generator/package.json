@@ -1,0 +1,24 @@
+{
+  "name": "@booklet/openapi-generator",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build": "node --check generate.mjs && node --check contract-check.mjs && node --check run-check.mjs",
+    "check": "node run-check.mjs",
+    "generate": "node generate.mjs",
+    "lint": "eslint . --max-warnings=0",
+    "test": "pnpm --filter @booklet/api run build && node --test test/*.test.mjs",
+    "typecheck": "node --check generate.mjs && node --check contract-check.mjs && node --check run-check.mjs"
+  },
+  "devDependencies": {
+    "@booklet/eslint-config": "workspace:*",
+    "eslint": "10.8.0",
+    "openapi-typescript": "7.13.0",
+    "prettier": "3.9.6",
+    "typescript": "5.9.3"
+  }
+}

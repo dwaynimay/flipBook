@@ -18,11 +18,14 @@
  */
 
 const permittedLicenseIdentifiers = new Set([
+  "(MIT OR CC0-1.0)",
+  "0BSD",
   "Apache-2.0",
   "BSD-2-Clause",
   "BSD-3-Clause",
   "ISC",
   "MIT",
+  "Python-2.0",
   "PostgreSQL",
 ]);
 
