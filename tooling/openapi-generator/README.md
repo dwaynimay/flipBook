@@ -4,4 +4,4 @@ This workspace owns only deterministic `openapi.json` to TypeScript generation. 
 
 `apps/api` and `packages/api-contracts` remain pinned to TypeScript 6.0.3. The generated output is formatted deterministically, checked for drift, and compiled by the consumer package under TypeScript 6.
 
-The check path generates fresh artifacts from the current built NestJS source into temporary directories, compares two runs for determinism, compares both committed files byte-for-byte, and removes only its own temporary directory.
+The check path generates fresh artifacts from the current built NestJS source into temporary directories, compares two runs for determinism, compares both committed files byte-for-byte, and removes only its own temporary directory. Its `workspace:*` development edge to `@booklet/api` exists solely so the outer Turbo `^build` graph prepares that artifact; generator tasks never import application source or start nested Turbo runs.

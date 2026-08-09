@@ -198,6 +198,9 @@ importers:
 
   tooling/openapi-generator:
     devDependencies:
+      '@booklet/api':
+        specifier: workspace:*
+        version: link:../../apps/api
       '@booklet/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config-eslint

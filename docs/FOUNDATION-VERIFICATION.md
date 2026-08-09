@@ -193,7 +193,7 @@ spread/orientation mapping, not arbitrary page styling.
 | `corepack pnpm run contracts:check` | Pass; current Nest metadata generated twice into temporary outputs and both committed artifacts matched byte-for-byte |
 | `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run lint` | Pass uncached; 8/8 workspace tasks, zero warnings |
 | `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run typecheck` | Pass uncached; 8/8 workspace tasks |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run test` | Pass uncached; 11/11 task graph owners. API passed 6 files/42 tests, API contracts 1 file/2 tests, generator source-drift 1 test, content schema 2 files/71 tests, and observability 4 files/33 tests. |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run test` | Pass uncached; 12/12 outer task-graph owners, including the generator workspace's explicit `@booklet/api#build` dependency with no nested Turbo run. API passed 6 files/42 tests, API contracts 1 file/2 tests, generator source-drift 1 test, content schema 2 files/71 tests, and observability 4 files/33 tests. |
 | `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run build` | Pass uncached; 8/8 workspace tasks |
 | `corepack pnpm run license:check` | Pass; 319 exact installed package-version records across 10 approved licenses; production inventory 217 records across 8 licenses |
 | `corepack pnpm exec turbo run build --dry=json` | Pass; 8 valid build tasks |
