@@ -25,6 +25,7 @@ import type {
 const MAX_ASPECT_RATIO_COMPONENT = 10_000;
 const MAX_JSON_DEPTH = 64;
 const MAX_JSON_NODES = 10_000;
+export const MAX_PAGE_BLOCKS = 100;
 const dangerousObjectKeys = new Set(["__proto__", "constructor", "prototype"]);
 const identifierSuffixPattern = /^[a-z0-9]+(?:_[a-z0-9]+)*$/;
 
@@ -213,7 +214,7 @@ const pageBlockSchema = z.discriminatedUnion("type", [
 
 const pageDocumentSchema = z
   .strictObject({
-    blocks: z.array(pageBlockSchema).max(100),
+    blocks: z.array(pageBlockSchema).max(MAX_PAGE_BLOCKS),
     layout: z.strictObject({
       background: z.enum(["accent-subtle", "surface-default", "surface-subtle"]),
       preset: z.literal("portrait"),
@@ -646,6 +647,20 @@ function cloneValidatedJson(
   return { data: output, success: true };
 }
 
+export function safeCloneContentJsonInput(input: unknown): SafeParseResult<unknown> {
+  const preflightIssues = preflightPageInput(input);
+  if (preflightIssues.length > 0) {
+    return { issues: preflightIssues, success: false };
+  }
+  const clonedInput = cloneValidatedJson(input, [], 0, {
+    active: new WeakSet<object>(),
+    nodes: 0,
+  });
+  return clonedInput.success
+    ? { data: clonedInput.data, success: true }
+    : { issues: [clonedInput.issue], success: false };
+}
+
 interface BrandParser<TValue> {
   readonly parse: (input: unknown) => TValue;
   readonly safeParse: (input: unknown) => SafeParseResult<TValue>;
@@ -720,16 +735,9 @@ export class PageDocumentValidationError extends Error {
 }
 
 export function safeParsePageDocument(input: unknown): SafeParsePageDocumentResult {
-  const preflightIssues = preflightPageInput(input);
-  if (preflightIssues.length > 0) {
-    return { issues: preflightIssues, success: false };
-  }
-  const clonedInput = cloneValidatedJson(input, [], 0, {
-    active: new WeakSet<object>(),
-    nodes: 0,
-  });
+  const clonedInput = safeCloneContentJsonInput(input);
   if (!clonedInput.success) {
-    return { issues: [clonedInput.issue], success: false };
+    return clonedInput;
   }
   const result = pageDocumentSchema.safeParse(clonedInput.data);
   return result.success

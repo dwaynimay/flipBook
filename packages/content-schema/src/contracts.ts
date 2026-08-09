@@ -165,3 +165,82 @@ export interface PageDocument {
 
 export type PageDocumentValidationIssue = ContentValidationIssue;
 export type SafeParsePageDocumentResult = SafeParseResult<PageDocument>;
+
+export type PageMigrationCode =
+  | "downgrade_not_supported"
+  | "invalid_document"
+  | "invalid_schema_version"
+  | "invalid_target_version"
+  | "migration_failed"
+  | "migration_gap"
+  | "missing_schema_version"
+  | "unsupported_future_version"
+  | "unsupported_target_version";
+
+export interface PageMigrationIssue {
+  readonly code: PageMigrationCode;
+  readonly message: string;
+  readonly path: readonly (number | string)[];
+  readonly validationIssues: readonly ContentValidationIssue[];
+}
+
+export type SafeMigratePageDocumentResult =
+  | {
+      readonly data: PageDocument;
+      readonly fromVersion: number;
+      readonly migrated: boolean;
+      readonly success: true;
+      readonly toVersion: 1;
+    }
+  | {
+      readonly issues: readonly PageMigrationIssue[];
+      readonly success: false;
+    };
+
+export interface UnknownBlockFallback {
+  readonly id: BlockId;
+  readonly originalTypeLabel: string;
+  readonly type: "unknown-block";
+  readonly version: 1;
+}
+
+export type ReaderPageBlock = PageBlock | UnknownBlockFallback;
+
+export interface ReaderPageDocument {
+  readonly blocks: readonly ReaderPageBlock[];
+  readonly layout: PageLayout;
+  readonly pageId: PageId;
+  readonly schemaVersion: 1;
+}
+
+export interface UnknownBlockEvidence {
+  readonly blockId: BlockId;
+  readonly blockIndex: number;
+  readonly code: "unknown_block_replaced";
+  readonly originalTypeLabel: string;
+  readonly originalVersion: number;
+}
+
+export interface ReaderPreparation {
+  readonly document: ReaderPageDocument;
+  readonly evidence: readonly UnknownBlockEvidence[];
+}
+
+export type ReaderPreparationCode = "duplicate_block_id" | "invalid_document" | "malformed_block";
+
+export interface ReaderPreparationIssue {
+  readonly code: ReaderPreparationCode;
+  readonly message: string;
+  readonly path: readonly (number | string)[];
+  readonly validationIssues: readonly ContentValidationIssue[];
+}
+
+export type SafePreparePageDocumentResult =
+  | {
+      readonly data: ReaderPreparation;
+      readonly success: true;
+    }
+  | {
+      readonly issues: readonly ReaderPreparationIssue[];
+      readonly success: false;
+    };

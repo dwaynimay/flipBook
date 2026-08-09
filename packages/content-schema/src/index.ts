@@ -16,6 +16,17 @@ export {
   safeParseQuizId,
   safeParseSafeHttpsUrl,
 } from "./schema.js";
+export {
+  CURRENT_PAGE_SCHEMA_VERSION,
+  PageDocumentMigrationError,
+  migratePageDocument,
+  safeMigratePageDocument,
+} from "./migration.js";
+export {
+  PageDocumentReaderPreparationError,
+  preparePageDocumentForReader,
+  safePreparePageDocumentForReader,
+} from "./reader.js";
 export type {
   AspectRatio,
   BlockId,
@@ -40,6 +51,8 @@ export type {
   PageBackgroundToken,
   PageBlock,
   PageDocument,
+  PageMigrationCode,
+  PageMigrationIssue,
   PageDocumentValidationIssue,
   PageId,
   PageLayout,
@@ -50,6 +63,11 @@ export type {
   QuizTriggerBlockProps,
   QuoteBlock,
   QuoteBlockProps,
+  ReaderPreparation,
+  ReaderPageBlock,
+  ReaderPageDocument,
+  ReaderPreparationCode,
+  ReaderPreparationIssue,
   SafeHttpsUrl,
   SafeParseBlockIdResult,
   SafeParseMediaIdResult,
@@ -59,6 +77,10 @@ export type {
   SafeParseQuizIdResult,
   SafeParseResult,
   SafeParseSafeHttpsUrlResult,
+  SafeMigratePageDocumentResult,
+  SafePreparePageDocumentResult,
+  UnknownBlockEvidence,
+  UnknownBlockFallback,
   VideoBlock,
   VideoBlockProps,
 } from "./contracts.js";

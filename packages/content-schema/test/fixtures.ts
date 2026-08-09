@@ -81,3 +81,9 @@ export const validPageDocumentFixture = {
   pageId: "page_anemia_1",
   schemaVersion: 1,
 } as const;
+
+export const draftImportV0Fixture = {
+  ...validPageDocumentFixture,
+  blocks: validPageDocumentFixture.blocks.map((block) => ({ ...block, version: 0 })),
+  schemaVersion: 0,
+} as const;

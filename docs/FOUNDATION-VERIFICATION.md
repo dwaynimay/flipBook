@@ -4,8 +4,8 @@
 
 | Field | Value |
 | --- | --- |
-| Date | 6 August 2026 |
-| Tasks | GOV-001–GOV-003, FND-001–FND-008, CON-001 |
+| Date | 9 August 2026 |
+| Tasks | GOV-001–GOV-003, FND-001–FND-008, CON-001–CON-002 |
 | Repository | `D:\Github\flipBook` |
 | Feature code | Framework-free content contract only; no application composition |
 
@@ -152,6 +152,17 @@ Internal reader navigation is a separate logical-page contract. The persisted
 page preset remains portrait because landscape behavior belongs to reader
 spread/orientation mapping, not arbitrary page styling.
 
+## CON-002 Content Compatibility Evidence
+
+| Check | Actual result |
+| --- | --- |
+| Version history | `schemaVersion: 1` remains the first published contract. Version 0 is documented and implemented only as an explicit pre-publication draft/import envelope. |
+| Migration registry | A framework-free document registry applies exact adjacent steps only. The 0-to-1 step delegates every known block through an exhaustive per-block registry, rejects missing block steps, never downgrades or skips, clones input before work, and runs strict v1 validation on its result. Current v1 input is validated and returned idempotently. |
+| Failure surface | Missing, malformed, future, downgrade, unsupported-target, step-gap, unsafe-input, and final-validation failures use stable project-owned result codes. The throwing API exposes only `PageDocumentMigrationError`. |
+| Unknown-block policy | Publication parsing remains strict. Reader preparation accepts only structurally valid truly unknown blocks with exactly `id`, `type`, `version`, and `props`; the ID must be valid and unique, the version is bounded from 1 through 1,000, props must be a JSON object, and the full known-plus-unknown source list remains within the shared 100-block page limit. It emits an inert fallback without props plus typed evidence containing only the ID, source index, safe label, and original version. Both safe and throwing APIs retain that evidence. Unsafe labels become `unrecognized`; extra envelope fields, known malformed blocks, and malformed unknown envelopes fail closed. |
+| Isolation | Migration and fallback preparation have no React, NestJS, Prisma, Node API, logging, or browser dependency. Observability is typed data returned to the caller rather than an implicit side effect. |
+| Tests | Vitest passed 2 files and 71 tests. The 28 CON-002 cases cover exact v0-to-v1 migration, all known block seams, v1 idempotence, invalid version/target classes, no-mutation, final validation, dangerous keys, publication strictness, ordered unknown replacement, hostile-prop erasure, label sanitization, strict unknown envelopes, malformed known/unknown rejection with source-index preservation, duplicate IDs, the shared page block limit, and evidence-preserving project-owned throwing APIs. |
+
 ## Quality-Gate Evidence
 
 | Command | Result |
@@ -160,7 +171,7 @@ spread/orientation mapping, not arbitrary page styling.
 | `corepack pnpm run format:check` | Pass |
 | `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run lint` | Pass uncached; 5/5 workspace tasks, zero warnings |
 | `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run typecheck` | Pass uncached; 5/5 workspace tasks |
-| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run test` | Pass uncached before the final Proxy regression additions; 7/7 task graph owners. The final targeted content-schema rerun passed 1 Vitest file/43 tests; observability contributed 4 files/33 tests in the uncached root run. |
+| `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run test` | Pass uncached; 7/7 task graph owners. Content schema passed 2 files/71 tests and observability passed 4 files/33 tests. |
 | `$env:TURBO_FORCE='true'; $env:TURBO_CONCURRENCY='1'; corepack pnpm run build` | Pass uncached; 5/5 workspace tasks |
 | `corepack pnpm run license:check` | Pass; 148 exact installed package-version records across 7 approved licenses; production inventory 103 records across 6 licenses |
 | `corepack pnpm exec turbo run build --dry=json` | Pass; 5 valid build tasks |
@@ -189,6 +200,7 @@ after the repository added an explicit LF policy in `.gitattributes`.
 | FND-007 | DONE | Reproducibility, loopback isolation, clean bootstrap, persistence, license record, ADR-008, and time-bounded Product Owner CVE risk disposition verified |
 | FND-008 | DONE | Typed config, nominal structured logger/correlation boundaries with runtime issuance guards, accumulated context, safe Error projection, keyed structured-field redaction, public type isolation, 4 files/33 tests, development plus production license gates, and clean package audit verified |
 | CON-001 | DONE | Framework-free PageDocument v1 contract, ten strict block variants, required media geometry, legal branded constructors, bounded Proxy-safe JSON trust preflight/clone, stable project-owned validation surface, explicit schema-output mapping, exhaustive `never`, deterministic clean build, declaration isolation, and 1 file/43 tests verified |
+| CON-002 | DONE | Deterministic adjacent-step v0 draft/import-to-v1 migration, exhaustive per-known-block seams, strict final validation, typed migration failures, current-version idempotence, and reader-only inert unknown-block fallback with safe evidence; 2 files/71 total package tests verified |
 
 ## Known Risks and Deferred Work
 

@@ -23,5 +23,26 @@ reader spread/orientation concern owned by the flipbook adapter, not persisted
 page styling. The PRD's combined `button/link` capability is represented by one
 `button-link` discriminant with an allowlisted `appearance` value.
 
-Schema migration and unknown-block fallback policy belong to CON-002 and are
-intentionally outside this package version.
+## Compatibility boundary
+
+`schemaVersion: 1` is the first published schema. Version 0 is an explicit
+pre-publication draft/import compatibility envelope; it is not fabricated
+published history. `safeMigratePageDocument` and `migratePageDocument` apply
+only registered adjacent steps. They never skip a version, downgrade a
+document, mutate caller input, or return content before strict current-schema
+validation. The per-block v0-to-v1 registry is exhaustive for the ten known MVP
+block types.
+
+Publication remains strict: `safeParsePageDocument` rejects every unknown block
+type. The reader-only `safePreparePageDocumentForReader` boundary is forward
+tolerant. It replaces a structurally valid, truly unknown block with an inert
+`unknown-block` record and returns separate typed evidence for observability.
+The fallback retains only its validated unique block ID and a bounded safe type
+label. The original positive bounded version and source index exist only in the
+separate `UnknownBlockEvidence` record. Unknown props are discarded.
+The unknown envelope itself is strict and permits only `id`, `type`, `version`,
+and `props`; extra top-level fields, known-but-malformed blocks, and malformed
+unknown envelopes are rejected rather than disguised as fallbacks. The current
+100-block page limit applies to the complete source list, including unknown
+blocks. Both safe and throwing preparation APIs return the typed evidence. This
+package does not own a logger or any React rendering behavior.
