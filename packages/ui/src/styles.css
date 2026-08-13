@@ -1,0 +1,190 @@
+:root {
+  color-scheme: light;
+  --booklet-ink: #17261f;
+  --booklet-ink-muted: #5d6c65;
+  --booklet-paper: #fffdf7;
+  --booklet-surface: #f7f4ea;
+  --booklet-border: rgb(23 38 31 / 12%);
+  --booklet-primary: #b12d45;
+  --booklet-primary-strong: #8f2036;
+  --booklet-primary-soft: #f9e9ec;
+  --booklet-accent: #dcae55;
+  --booklet-success: #23684e;
+  --booklet-status: #3f9a72;
+  --booklet-status-soft: #d9efe5;
+  --booklet-cover-deep: #93243a;
+  --booklet-cover-mid: #be3a51;
+  --booklet-cover-light: #d05b6e;
+  --booklet-warning-surface: #fff1cf;
+  --booklet-warning-border: #e9c56f;
+  --booklet-cover-paper: #f4e8dc;
+  --booklet-page-accent-start: #fff9f2;
+  --booklet-page-accent-end: #f9e8e8;
+  --booklet-page-subtle-start: #fffdf8;
+  --booklet-page-subtle-end: #f1eee4;
+  --booklet-info-surface: #edf4f0;
+  --booklet-info-border: #4d856e;
+  --booklet-tip-surface: #f7f0dd;
+  --booklet-fallback-surface: #f2efe7;
+  --booklet-fallback-border: #b5ada0;
+  --booklet-dark: #18251f;
+  --booklet-dark-soft: #1e3028;
+  --booklet-gold: #f1c97a;
+  --booklet-myth-accent: #ef8194;
+  --booklet-cover-alt-deep: #8e2238;
+  --booklet-cover-alt-mid: #ba334c;
+  --booklet-cover-alt-light: #d75c6e;
+  --booklet-gold-light: #f6d18a;
+  --booklet-success-surface: #e2f1ea;
+  --booklet-option-surface: #faf6ed;
+  --booklet-option-border: #b8bdb9;
+  --booklet-focus-ring: rgb(177 45 69 / 42%);
+  --booklet-radius-sm: 0.75rem;
+  --booklet-radius-md: 1.25rem;
+  --booklet-radius-lg: 2rem;
+  --booklet-shadow-sm: 0 8px 28px rgb(23 38 31 / 8%);
+  --booklet-shadow-lg: 0 30px 80px rgb(25 31 28 / 20%);
+}
+
+.booklet-button {
+  align-items: center;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  gap: 0.5rem;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.65rem 1.1rem;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.booklet-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.booklet-button:focus-visible {
+  outline: 3px solid rgb(177 45 69 / 24%);
+  outline-offset: 3px;
+}
+.booklet-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+.booklet-button--primary {
+  background: var(--booklet-primary);
+  color: white;
+}
+.booklet-button--primary:hover:not(:disabled) {
+  background: var(--booklet-primary-strong);
+}
+.booklet-button--soft {
+  background: var(--booklet-primary-soft);
+  color: var(--booklet-primary-strong);
+}
+.booklet-button--ghost {
+  background: transparent;
+  color: var(--booklet-ink);
+}
+.booklet-button--ghost:hover:not(:disabled) {
+  background: rgb(23 38 31 / 7%);
+}
+
+.booklet-progress {
+  display: grid;
+  gap: 0.45rem;
+  width: 100%;
+}
+.booklet-progress__meta {
+  color: var(--booklet-ink-muted);
+  display: flex;
+  font-size: 0.75rem;
+  font-weight: 700;
+  justify-content: space-between;
+}
+.booklet-progress__track {
+  background: rgb(23 38 31 / 10%);
+  border-radius: 999px;
+  height: 0.4rem;
+  overflow: hidden;
+}
+.booklet-progress__value {
+  background: var(--booklet-primary);
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+  transition: width 220ms ease;
+}
+
+.booklet-dialog-overlay {
+  background: rgb(13 24 19 / 64%);
+  inset: 0;
+  position: fixed;
+  z-index: 80;
+}
+
+.booklet-dialog-content {
+  background: var(--booklet-paper);
+  border: 1px solid rgb(255 255 255 / 54%);
+  border-radius: var(--booklet-radius-lg);
+  box-shadow: var(--booklet-shadow-lg);
+  left: 50%;
+  max-height: min(90vh, 46rem);
+  max-width: min(calc(100vw - 2rem), 36rem);
+  overflow: auto;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  position: fixed;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  z-index: 81;
+}
+
+.booklet-dialog-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+.booklet-dialog-title {
+  color: var(--booklet-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.6rem, 5vw, 2.15rem);
+  line-height: 1.05;
+  margin: 0;
+}
+.booklet-dialog-description {
+  color: var(--booklet-ink-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0.55rem 0 0;
+}
+.booklet-dialog-close {
+  align-items: center;
+  background: rgb(23 38 31 / 7%);
+  border: 0;
+  border-radius: 50%;
+  color: var(--booklet-ink);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 2.5rem;
+  justify-content: center;
+  width: 2.5rem;
+}
+.booklet-dialog-close:focus-visible {
+  outline: 3px solid rgb(177 45 69 / 24%);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .booklet-button,
+  .booklet-progress__value {
+    transition: none;
+  }
+}

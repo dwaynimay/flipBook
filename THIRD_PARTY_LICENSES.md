@@ -5,7 +5,7 @@
 | Metadata | Nilai |
 | --- | --- |
 | Status | Approved baseline — dependencies locked; FND-007 local image risk accepted temporarily |
-| Tanggal verifikasi | 9 Agustus 2026 |
+| Tanggal verifikasi | 12 Agustus 2026 |
 | Scope | Dependency terpasang dan kandidat dependency produk |
 | Release authority | Lockfile dan generated notice bundle |
 
@@ -28,6 +28,11 @@ Tidak semua package di bagian “evaluated/conditional” akan dipasang.
 - Python-2.0
 - CC0-1.0 when selected through an explicit permissive dual-license option
 - BlueOak-1.0.0 hanya untuk `minimatch@10.2.6`
+- MIT-0 hanya untuk `@csstools/color-helpers@6.1.0` dan
+  `@csstools/css-syntax-patches-for-csstree@1.1.7`.
+- CC0-1.0 hanya untuk `mdn-data@2.27.1`.
+- BlueOak-1.0.0 juga diizinkan untuk `lru-cache@11.5.2` pada exact frontend
+  toolchain yang terkunci.
 - PostgreSQL License
 
 ### Diizinkan Bersyarat
@@ -62,17 +67,17 @@ Versi final wajib dikunci melalui lockfile. Major version tidak boleh dinaikkan 
 | `typescript-eslint` | 8.65.0 | MIT | TypeScript parser and strict lint rules | Locked |
 | Prettier | 3.9.6 | MIT | Deterministic formatting | Locked |
 | `@types/node` | 24.13.3 | MIT | Node.js tooling types | Locked |
-| Vite | 8.1.5 | MIT | Frontend build tool | Planned |
+| Vite | 8.2.1 | MIT | Frontend build tool for `apps/web` | Locked |
 | React | 19.2.8 | MIT | Frontend runtime | Locked major |
 | React DOM | 19.2.8 | MIT | DOM renderer | Locked major |
 | React Router DOM | 7.18.1 | MIT | SPA routing | Planned |
-| Tailwind CSS | 4.3.3 | MIT | Styling | Planned |
+| Tailwind CSS | 4.3.3 | MIT | Styling for `apps/web` | Locked |
 | shadcn CLI/source registry | 4.16.0 | MIT | Source-owned UI components | Planned |
-| Radix UI packages | Per component | MIT | Accessible primitives | Planned per component |
+| Radix Dialog (`@radix-ui/react-dialog`) | 1.1.23 | MIT | Accessible dialog primitive owned by `packages/ui` | Locked |
 | class-variance-authority | 0.7.1 | Apache-2.0 | Typed visual variants | Planned |
 | clsx | 2.1.1 | MIT | Conditional classes | Planned |
 | tailwind-merge | 3.6.0 | MIT | Class conflict resolution | Planned |
-| Lucide React | 1.27.0 | ISC | Icons | Planned |
+| Lucide React | 1.31.0 | ISC | Icons | Locked |
 
 Sources:
 
@@ -102,7 +107,8 @@ TypeScript 7.0.2 tidak masuk lockfile foundation karena peer dependency
 | Lightning CSS | 1.33.0 | MPL-2.0 | Transitive development-only melalui Vitest/Vite; tidak masuk runtime atau artifact `dist` |
 | brace-expansion | 5.0.9 | MIT | Narrow workspace security override untuk menutup GHSA-rgw5-rvv9-x895 pada tooling graph |
 
-BlueOak-1.0.0 dibatasi hanya untuk `minimatch@10.2.6`. Inventaris
+BlueOak-1.0.0 dibatasi hanya untuk `minimatch@10.2.6` dan
+`lru-cache@11.5.2`. Inventaris
 package/version/license lengkap yang disetujui berada di
 `tooling/scripts/licenses-allowlist.json`. License gate membandingkan inventory
 terpasang secara exact dan secara independen menolak identifier di luar MIT,
@@ -122,6 +128,13 @@ version tersebut diizinkan pada inventory development.
 `brace-expansion@5.0.9` menggantikan 5.0.8 melalui override yang hanya mencakup
 rentang vulnerable `>=5.0.0 <5.0.9`; versi patched tetap memenuhi contract
 `minimatch@10.2.6` dan tidak mengubah dependency runtime aplikasi.
+
+Frontend preview menambahkan tiga identifier permissive dengan pengecualian
+package-version sempit: MIT-0 untuk dua package parser warna CSS Tools di atas,
+CC0-1.0 untuk data referensi standar web `mdn-data@2.27.1`, dan
+BlueOak-1.0.0 untuk `lru-cache@11.5.2`. Policy regression tests memastikan
+package atau versi tetangga dengan identifier yang sama tetap ditolak. Notice
+dan license text package terkait wajib dipertahankan pada release inventory.
 
 ### Local Infrastructure Images
 
@@ -158,7 +171,7 @@ Sources:
 | `@tanstack/react-table` | 8.21.3 | MIT | Admin tables | Planned |
 | `react-hook-form` | 7.83.0 | MIT | Forms | Planned |
 | Zod | 4.4.3 | MIT | Runtime schema in `packages/observability` and `packages/content-schema` | Locked for FND-008 and CON-001 |
-| Motion (`motion`) | 12.42.2 | MIT | Stateful animation | Planned |
+| Motion (`motion`) | 13.1.0 | MIT | Stateful animation in renderer and quiz engine | Locked |
 | Recharts | 3.10.1 | MIT | Dashboard/progress charts | Planned |
 | `@daypicker/react` | 10.0.1 | MIT | Calendar/date selection | Planned |
 | date-fns | 4.4.0 | MIT | Date calculation/format | Planned |
@@ -196,7 +209,7 @@ Sources:
 
 | Package/project | Versi teramati | License | Pemakaian | Status |
 | --- | ---: | --- | --- | --- |
-| StPageFlip (`page-flip`) | 2.0.7 | MIT | Page physics through internal adapter | Planned after spike |
+| StPageFlip (`page-flip`) | 2.0.7 | MIT | Page physics through `packages/flipbook-engine` only | Locked for visible reader preview; full SPK-001 verification remains open |
 | `react-pageflip` | 2.0.3 | MIT | React wrapper candidate | Evaluated; not approved/installed |
 
 Conditions:
@@ -207,6 +220,21 @@ Conditions:
 - vertical semantic reader remains available.
 
 Source: https://github.com/Nodlik/StPageFlip
+
+### Visible Reader Preview Tooling
+
+| Package/project | Versi terkunci | License | Pemakaian | Status |
+| --- | ---: | --- | --- | --- |
+| `@tailwindcss/vite` | 4.3.3 | MIT | Tailwind integration for Vite | Locked |
+| `@vitejs/plugin-react` | 6.0.5 | MIT | React transform for Vite | Locked |
+| `@types/react` | 19.2.18 | MIT | React authored-code types | Locked development dependency |
+| `@types/react-dom` | 19.2.4 | MIT | React DOM authored-code types | Locked development dependency |
+| Playwright Test | 1.62.1 | Apache-2.0 | Desktop/mobile critical interaction tests | Locked development dependency; isolated Edge desktop/mobile journeys pass locally |
+
+All packages above were resolved to exact versions in `pnpm-lock.yaml`. The
+visible reader production build passed on 12 August 2026. This record does not
+promote SPK-001, VS-008, VS-009, INT-003, or INT-004 to `DONE`; their complete
+roadmap acceptance and browser matrices remain governed by `docs/TASKS.md`.
 
 ## 6. Planned Backend Dependencies
 
@@ -265,7 +293,6 @@ run Scarf telemetry. Narrow overrides select patched `js-yaml@4.3.1`,
 | --- | ---: | --- | --- | --- |
 | Vitest | 4.1.10 | MIT | Unit/component tests; contracts for observability and content schema | Locked for FND-008 and CON-001 |
 | Testing Library React | 16.3.2 | MIT | React behavior tests | Planned |
-| Playwright Test | 1.62.0 | Apache-2.0 | Browser E2E | Planned |
 | Supertest | 7.2.2 | MIT | HTTP integration tests | Locked for CON-003 |
 | ESLint | 10.8.0 | MIT | Static analysis | Locked |
 | Prettier | 3.9.6 | MIT | Formatting | Locked |

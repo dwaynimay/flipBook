@@ -29,6 +29,15 @@ const permittedLicenseIdentifiers = new Set([
   "PostgreSQL",
 ]);
 
+const permittedMitZeroPackageKeys = new Set([
+  "@csstools/color-helpers@6.1.0",
+  "@csstools/css-syntax-patches-for-csstree@1.1.7",
+]);
+
+const permittedCcZeroPackageKeys = new Set(["mdn-data@2.27.1"]);
+
+const permittedBlueOakPackageKeys = new Set(["lru-cache@11.5.2", "minimatch@10.2.6"]);
+
 const permittedMplPackageKeys = new Set([
   "lightningcss@1.33.0",
   "lightningcss-android-arm64@1.33.0",
@@ -171,8 +180,26 @@ function parsePackageEntries(packages, source) {
  */
 function assertPermittedLicense(packageKey, license) {
   if (license === "BlueOak-1.0.0") {
-    if (packageKey !== "minimatch@10.2.6") {
-      throw new Error(`BlueOak-1.0.0 is approved only for minimatch@10.2.6, not ${packageKey}.`);
+    if (!permittedBlueOakPackageKeys.has(packageKey)) {
+      throw new Error(
+        `BlueOak-1.0.0 is approved only for exact reviewed packages, not ${packageKey}.`,
+      );
+    }
+
+    return;
+  }
+
+  if (license === "MIT-0") {
+    if (!permittedMitZeroPackageKeys.has(packageKey)) {
+      throw new Error(`MIT-0 is approved only for exact reviewed packages, not ${packageKey}.`);
+    }
+
+    return;
+  }
+
+  if (license === "CC0-1.0") {
+    if (!permittedCcZeroPackageKeys.has(packageKey)) {
+      throw new Error(`CC0-1.0 is approved only for exact reviewed packages, not ${packageKey}.`);
     }
 
     return;

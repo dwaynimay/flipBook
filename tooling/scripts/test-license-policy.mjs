@@ -74,8 +74,35 @@ assert.throws(
       [{ license: "BlueOak-1.0.0", name: "other-package", version: "1.0.0" }],
       [{ license: "BlueOak-1.0.0", name: "other-package", version: "1.0.0" }],
     ),
-  /approved only for minimatch@10\.2\.6/u,
+  /approved only for exact reviewed packages/u,
 );
+
+for (const approvedNarrowRecord of [
+  { license: "BlueOak-1.0.0", name: "lru-cache", version: "11.5.2" },
+  { license: "MIT-0", name: "@csstools/color-helpers", version: "6.1.0" },
+  {
+    license: "MIT-0",
+    name: "@csstools/css-syntax-patches-for-csstree",
+    version: "1.1.7",
+  },
+  { license: "CC0-1.0", name: "mdn-data", version: "2.27.1" },
+]) {
+  assert.deepEqual(validateExactLicenseInventory([approvedNarrowRecord], [approvedNarrowRecord]), {
+    licenseCount: 1,
+    packageCount: 1,
+  });
+}
+
+for (const unapprovedNarrowRecord of [
+  { license: "BlueOak-1.0.0", name: "lru-cache", version: "11.5.3" },
+  { license: "MIT-0", name: "@csstools/other", version: "6.1.0" },
+  { license: "CC0-1.0", name: "other-data", version: "2.27.1" },
+]) {
+  assert.throws(
+    () => validateExactLicenseInventory([unapprovedNarrowRecord], [unapprovedNarrowRecord]),
+    /approved only for exact reviewed packages/u,
+  );
+}
 
 const approvedLightningCss = [{ license: "MPL-2.0", name: "lightningcss", version: "1.33.0" }];
 
