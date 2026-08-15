@@ -1,0 +1,848 @@
+/* ------------------------------------------------------------------
+   Player flipbook.
+
+   Efek flip sepenuhnya berbasis CSS 3D transform — tidak ada canvas,
+   tidak ada WebGL. Ini mengikuti temuan riset di docs/00-RESEARCH.md §2.2:
+   Flipsnack sendiri merender player-nya dengan DOM + CSS.
+   ------------------------------------------------------------------ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #1c1e26;
+  color: #e8e9ed;
+  font: 14px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  overscroll-behavior: none;
+}
+
+/* ---------- shell ---------- */
+
+.shell {
+  height: 100%;
+  display: flex;
+}
+
+.shell--center {
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.notice {
+  max-width: 34rem;
+  text-align: center;
+  color: #a9adbb;
+  white-space: pre-line;
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- pemilih buku ---------- */
+
+.picker {
+  width: min(960px, 100%);
+}
+
+.picker__title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin: 0 0 20px;
+  color: #c9ccd8;
+}
+
+.picker__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 20px;
+}
+
+.picker__card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.picker__card img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #2a2d38;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 0.18s ease;
+}
+
+.picker__card:hover img {
+  transform: translateY(-3px);
+}
+
+.picker__name {
+  display: block;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+.picker__meta {
+  display: block;
+  color: #8a8f9e;
+  font-size: 12px;
+}
+
+/* ---------- panggung ---------- */
+
+.flipbook {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.flipbook__main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.flipbook__stage {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.stage__viewport {
+  /* touch-action: none wajib — tanpa ini browser mobile mengambil alih
+     gesture horizontal untuk scroll dan drag flip tidak pernah terpicu. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  transition: transform 0.22s ease;
+}
+
+.stage__viewport:active {
+  cursor: grabbing;
+}
+
+.book {
+  position: relative;
+  /* Perspektif harus ada di induk langsung lembar yang berputar. Nilai besar
+     menjaga distorsi tetap halus — nilai kecil membuat halaman terlihat melengkung
+     berlebihan seperti mainan. */
+  perspective: 2600px;
+  /* Titik hilang di tengah = punggung buku pada spread dua halaman, karena
+     engselnya memang di sana (lihat .leaf transform-origin). */
+  perspective-origin: 50% 50%;
+  filter: drop-shadow(0 18px 44px rgba(0, 0, 0, 0.55));
+}
+
+/* Mode satu halaman berengsel di tepi kiri, bukan di tengah — titik hilang
+   perspektif harus ikut pindah ke sana. Tanpa ini, lembar yang berputar
+   sedikit "melayang" karena arah 3D-nya menuju titik yang salah. */
+.book--single {
+  perspective-origin: 5% 50%;
+}
+
+/* Tepian halaman yang menumpuk — mensimulasikan ketebalan kertas yang belum
+   dibaca (kanan) dan yang sudah dibaca (kiri). Selalu tampak, bahkan saat
+   diam, karena ini yang membuat buku terlihat tebal, bukan selembar kartu.
+   box-shadow tidak ikut terpotong oleh overflow:hidden milik elemen sendiri —
+   hanya konten ANAK yang terpotong — jadi aman dipasang langsung di sini. */
+.book__static--right,
+.book__static--single {
+  box-shadow:
+    2px 0 0 0 #ece7da,
+    4px 0 0 0 #ddd7c5,
+    6px 0 0 0 #cec7b0;
+}
+
+.book__static--left {
+  box-shadow:
+    -2px 0 0 0 #ece7da,
+    -4px 0 0 0 #ddd7c5,
+    -6px 0 0 0 #cec7b0;
+}
+
+/* Di ujung buku tidak ada lagi halaman untuk ditumpuk ke arah itu. */
+.book__static--edge {
+  box-shadow: none;
+}
+
+/* ---------- halaman statis ---------- */
+
+.book__static {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.book__static--left {
+  left: 0;
+  width: 50%;
+}
+
+.book__static--right {
+  left: 50%;
+  width: 50%;
+}
+
+.book__static--single {
+  inset: 0;
+  width: 100%;
+}
+
+/* Bayangan jilid — halaman melengkung sedikit masuk ke arah punggung buku. */
+.gutter {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 7%;
+  pointer-events: none;
+}
+
+.gutter--left {
+  right: 0;
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.3));
+}
+
+.gutter--right {
+  left: 0;
+  background: linear-gradient(to left, transparent, rgba(0, 0, 0, 0.3));
+}
+
+/* ---------- lembar yang berputar ---------- */
+
+.leaf {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  /* Angkat ke lapisan komposit sendiri supaya rotasi tidak memicu repaint. */
+  will-change: transform;
+  z-index: 50;
+}
+
+.leaf--single {
+  left: 0;
+  width: 100%;
+}
+
+.leaf__face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: #fff;
+}
+
+.leaf__face--back {
+  transform: rotateY(180deg);
+}
+
+.leaf__face--paper {
+  background: #f4f1ea;
+}
+
+/* Bayangan dinamis: kunci realisme. Tanpa ini halaman hanya terlihat seperti
+   gambar datar yang diputar, bukan kertas yang terangkat. */
+.leaf__shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.leaf__shade--front {
+  background: linear-gradient(to left, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.85) 100%);
+}
+
+.leaf__shade--back {
+  background: linear-gradient(to right, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.85) 100%);
+}
+
+/* Kilau tipis di tepi bebas lembar — memuncak saat lembar tegak lurus (~90°),
+   seperti kertas melengkung menangkap cahaya dari samping saat terangkat.
+   Diposisikan berlawanan dengan .leaf__shade (yang gelap di sisi engsel):
+   di sini terang justru di sisi TEPI BEBAS. */
+.leaf__shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.leaf__shine--front {
+  background: linear-gradient(to left, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0) 32%);
+}
+
+.leaf__shine--back {
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0) 32%);
+}
+
+/* Bayangan yang DILEMPAR lembar ke halaman statis di bawahnya — bukan
+   penggelapan permukaan lembar itu sendiri (itu tugas .leaf__shade). Ini
+   yang membuat halaman di bawah terlihat benar-benar tertutup kertas yang
+   terangkat, bukan sekadar ada lembar melayang tanpa jejak.
+   Diposisikan sebagai anak .book__static, jadi otomatis terpotong rapi oleh
+   overflow:hidden milik kontainer itu. */
+.contact-shadow {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 45%;
+  pointer-events: none;
+}
+
+.contact-shadow--from-left {
+  left: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0) 100%);
+}
+
+.contact-shadow--from-right {
+  right: 0;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0) 100%);
+}
+
+/* ---------- muka halaman ---------- */
+
+.face {
+  position: absolute;
+  inset: 0;
+  background-color: #fff;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.face--blank {
+  background: transparent;
+}
+
+.face__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  -webkit-user-drag: none;
+}
+
+.face__links {
+  position: absolute;
+  inset: 0;
+}
+
+.hotspot {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: rgba(64, 132, 255, 0.001);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.hotspot:hover,
+.hotspot:focus-visible {
+  background: rgba(64, 132, 255, 0.22);
+  outline: 2px solid rgba(64, 132, 255, 0.65);
+}
+
+/* ---------- efek slide ---------- */
+
+.book--slide {
+  perspective: none;
+  overflow: hidden;
+}
+
+.slider {
+  position: absolute;
+  inset: 0;
+  /* translate3d, bukan translateX — memaksa lapisan komposit sendiri. */
+  will-change: transform;
+}
+
+.slider__slot {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- efek scroll ---------- */
+
+.scroller {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  padding: 24px 0;
+}
+
+.scroller__page {
+  position: relative;
+  width: min(820px, calc(100% - 32px));
+  margin: 0 auto 20px;
+  background: #fff;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroller {
+    scroll-behavior: auto;
+  }
+}
+
+/* ---------- panel samping ---------- */
+
+.sidebar {
+  flex: 0 0 268px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: rgba(0, 0, 0, 0.28);
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.sidebar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 8px 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.sidebar__title {
+  font-weight: 600;
+  color: #c9ccd8;
+}
+
+.sidebar__head button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #c9ccd8;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sidebar__head button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.sidebar__empty {
+  margin: 0;
+  padding: 20px 14px;
+  color: #878c9b;
+}
+
+/* thumbnail */
+
+.thumbs {
+  list-style: none;
+  margin: 0;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.thumb {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #9ba0af;
+  cursor: pointer;
+}
+
+.thumb img {
+  width: 100%;
+  object-fit: cover;
+  background: #2a2d38;
+  border: 2px solid transparent;
+  border-radius: 3px;
+  display: block;
+}
+
+.thumb span {
+  display: block;
+  padding-top: 4px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.thumb:hover img {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.thumb--active img {
+  border-color: #4084ff;
+}
+
+.thumb--active span {
+  color: #dfe2ea;
+}
+
+/* daftar isi */
+
+.outline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.outline .outline {
+  padding-left: 0;
+}
+
+.outline__item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 12px;
+  border: 0;
+  background: transparent;
+  color: #c2c6d2;
+  text-align: left;
+  cursor: pointer;
+}
+
+.outline__item:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.outline__label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.outline__page {
+  color: #7d8290;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* pencarian */
+
+.search {
+  padding: 12px;
+}
+
+.search__input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #e8e9ed;
+  font: inherit;
+}
+
+.search__input:focus {
+  outline: 2px solid #4084ff;
+  outline-offset: 0;
+  border-color: transparent;
+}
+
+.search__count {
+  margin: 10px 2px 4px;
+  color: #878c9b;
+  font-size: 12px;
+}
+
+.search__results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.search__hit {
+  display: block;
+  width: 100%;
+  padding: 9px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #b6bac6;
+  text-align: left;
+  cursor: pointer;
+}
+
+.search__hit:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.search__hitPage {
+  display: block;
+  color: #7d8290;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.search__snippet {
+  display: block;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.search__snippet mark {
+  background: rgba(64, 132, 255, 0.35);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* ---------- berbagi ---------- */
+
+.share {
+  position: absolute;
+  right: 14px;
+  bottom: 62px;
+  z-index: 100;
+  width: min(380px, calc(100% - 28px));
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: #23262f;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.share__label {
+  display: block;
+  margin-bottom: 5px;
+  color: #9ba0af;
+  font-size: 12px;
+}
+
+.share__row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.share input,
+.share textarea {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  color: #dfe2ea;
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  resize: vertical;
+}
+
+.share button {
+  padding: 7px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: #3a6fd8;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.share button:hover {
+  background: #4a7ce6;
+}
+
+.share__wide {
+  width: 100%;
+}
+
+/* ---------- bilah kontrol ---------- */
+
+.controller {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.controller__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #c2c6d2;
+  font-weight: 500;
+  padding-left: 6px;
+}
+
+.controller__group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.controller__group--start,
+.controller__group--end {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.controller__group--end {
+  justify-content: flex-end;
+}
+
+.segmented {
+  display: flex;
+  margin-right: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.segmented button {
+  width: auto;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 0;
+  font-size: 12.5px;
+  color: #9ba0af;
+}
+
+.segmented button + button {
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.segmented .segmented__on {
+  background: rgba(64, 132, 255, 0.22);
+  color: #dfe6f8;
+}
+
+.controller button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #d6d9e2;
+  font-size: 17px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.controller button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.controller button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.controller button:focus-visible {
+  outline: 2px solid #4084ff;
+  outline-offset: 1px;
+}
+
+.controller__pages {
+  min-width: 92px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: #c2c6d2;
+}
+
+.controller__sep {
+  opacity: 0.4;
+  margin: 0 2px;
+}
+
+@media (max-width: 900px) {
+  .controller__title {
+    display: none;
+  }
+  .segmented {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Panel menutupi panggung, bukan mendorongnya — di layar sempit
+     buku jadi terlalu kecil kalau berbagi ruang.
+
+     Lebar diatur lewat `width`, BUKAN flex-basis: elemen yang di-absolute
+     keluar dari alur flex, jadi flex-basis tidak berlaku dan panel akan
+     menciut mengikuti lebar konten. */
+  .sidebar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 90;
+    width: min(300px, 86vw);
+    background: #20232b;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  }
+  .flipbook__main {
+    position: relative;
+  }
+}
+
+/* Hormati preferensi sistem — animasi flip dinonaktifkan di kontroler,
+   sisanya diredam di sini. */
+@media (prefers-reduced-motion: reduce) {
+  .stage__viewport,
+  .picker__card img,
+  .controller button {
+    transition: none;
+  }
+  .spinner {
+    animation-duration: 2s;
+  }
+}

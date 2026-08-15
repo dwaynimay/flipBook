@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.turbo/
+*.log
+
+# Hasil konversi — dibangkitkan ulang dari fixtures, jangan di-commit.
+apps/player/public/books/
+
+# PDF uji dibangkitkan oleh fixtures/make-test-pdf.mjs
+fixtures/pdfs/

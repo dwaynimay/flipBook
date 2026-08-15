@@ -1,0 +1,21 @@
+{
+  "name": "flipsnack-clone",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "convert": "pnpm --filter @flip/worker convert",
+    "dev": "pnpm --filter @flip/player dev",
+    "build": "pnpm --filter @flip/player build",
+    "typecheck": "tsc --noEmit -p packages/pdf-engine && tsc --noEmit -p apps/worker && tsc --noEmit -p apps/player"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "pdf-lib": "^1.17.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
