@@ -98,7 +98,7 @@ export function PageFlipProto({ manifest, assetBase }: Props): React.ReactElemen
           maxHeight={2800}
           startPage={0}
           drawShadow
-          flippingTime={700}
+          flippingTime={350}
           usePortrait
           startZIndex={10}
           autoSize

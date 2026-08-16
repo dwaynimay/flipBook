@@ -124,7 +124,7 @@ export function useFlipController(
         return;
       }
 
-      const duration = Math.min(520, Math.max(180, distance * 620));
+      const duration = Math.min(320, Math.max(120, distance * 350));
       const ease = target === 1 ? easeOutQuart : easeOutCubic;
       const startedAt = performance.now();
       animatingRef.current = true;

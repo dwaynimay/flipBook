@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  page-flip@2.0.7: 7b00e01bceb88b92bde9de706338c6869edb72cfc355ff26d292182329c473c7
+
 importers:
 
   .:
@@ -1855,7 +1858,7 @@ snapshots:
 
   node-releases@2.0.53: {}
 
-  page-flip@2.0.7: {}
+  page-flip@2.0.7(patch_hash=7b00e01bceb88b92bde9de706338c6869edb72cfc355ff26d292182329c473c7): {}
 
   pako@1.0.11: {}
 
@@ -1887,7 +1890,7 @@ snapshots:
 
   react-pageflip@2.0.3:
     dependencies:
-      page-flip: 2.0.7
+      page-flip: 2.0.7(patch_hash=7b00e01bceb88b92bde9de706338c6869edb72cfc355ff26d292182329c473c7)
 
   react-refresh@0.17.0: {}
 

@@ -1,0 +1,177 @@
+{
+  ".claude/launch.json": {
+    "mtime": 1786857240.9451528,
+    "ast_hash": "b059df87961726f885492cf6368fcd98",
+    "semantic_hash": "b059df87961726f885492cf6368fcd98"
+  },
+  "apps/player/package.json": {
+    "mtime": 1786857100.2802732,
+    "ast_hash": "71e3efcc545d8b9e8000c27a67cee6bf",
+    "semantic_hash": "71e3efcc545d8b9e8000c27a67cee6bf"
+  },
+  "apps/player/src/App.tsx": {
+    "mtime": 1786899503.7641501,
+    "ast_hash": "d8286e3d792cfd4f76652a250ad03c5d",
+    "semantic_hash": "d8286e3d792cfd4f76652a250ad03c5d"
+  },
+  "apps/player/src/flipbook/ControllerBar.tsx": {
+    "mtime": 1786844057.5515523,
+    "ast_hash": "0a75cb2993db3440b83746f738b0f92f",
+    "semantic_hash": "0a75cb2993db3440b83746f738b0f92f"
+  },
+  "apps/player/src/flipbook/Flipbook.tsx": {
+    "mtime": 1786901575.2183156,
+    "ast_hash": "a8aed9d51e311f6ff6b565df949ba2b4",
+    "semantic_hash": "a8aed9d51e311f6ff6b565df949ba2b4"
+  },
+  "apps/player/src/flipbook/FoldMathEngine.ts": {
+    "mtime": 1786900983.4332623,
+    "ast_hash": "8458950f6f23100f474ded981130c237",
+    "semantic_hash": "8458950f6f23100f474ded981130c237"
+  },
+  "apps/player/src/flipbook/PageFace.tsx": {
+    "mtime": 1786750110.538677,
+    "ast_hash": "9f18168a8d3a55703020677653ad6b83",
+    "semantic_hash": "9f18168a8d3a55703020677653ad6b83"
+  },
+  "apps/player/src/flipbook/PageFlipProto.tsx": {
+    "mtime": 1786899503.765816,
+    "ast_hash": "d9ad6cf935a7b68d914e5b3253a60333",
+    "semantic_hash": "d9ad6cf935a7b68d914e5b3253a60333"
+  },
+  "apps/player/src/flipbook/ShareMenu.tsx": {
+    "mtime": 1786751541.3901656,
+    "ast_hash": "c2f7ba8ff60696973f990a185089ba01",
+    "semantic_hash": "c2f7ba8ff60696973f990a185089ba01"
+  },
+  "apps/player/src/flipbook/Sidebar.tsx": {
+    "mtime": 1786751526.3571205,
+    "ast_hash": "8ad2a963af139b1840b2bca302827685",
+    "semantic_hash": "8ad2a963af139b1840b2bca302827685"
+  },
+  "apps/player/src/flipbook/__tests__/engine.test.ts": {
+    "mtime": 1786901003.6625292,
+    "ast_hash": "f6f577454df44d1880ec44c868c7bdab",
+    "semantic_hash": "f6f577454df44d1880ec44c868c7bdab"
+  },
+  "apps/player/src/flipbook/effects/FlipStage.tsx": {
+    "mtime": 1786901252.691108,
+    "ast_hash": "127472e38e04ceb65213790766682af8",
+    "semantic_hash": "127472e38e04ceb65213790766682af8"
+  },
+  "apps/player/src/flipbook/effects/NaturalPageFlip.tsx": {
+    "mtime": 1786900971.7301927,
+    "ast_hash": "017180ae3f7719840ae6144e3b18f630",
+    "semantic_hash": "017180ae3f7719840ae6144e3b18f630"
+  },
+  "apps/player/src/flipbook/effects/SoftFlipStage.tsx": {
+    "mtime": 1786902067.9372995,
+    "ast_hash": "a2da26de1bf7f8f95f3ba623abb91ed2",
+    "semantic_hash": "a2da26de1bf7f8f95f3ba623abb91ed2"
+  },
+  "apps/player/src/flipbook/springPhysics.ts": {
+    "mtime": 1786900959.3865752,
+    "ast_hash": "4df89de9e3d98f583b969ccdae04e8dc",
+    "semantic_hash": "4df89de9e3d98f583b969ccdae04e8dc"
+  },
+  "apps/player/src/flipbook/types.ts": {
+    "mtime": 1786900948.169032,
+    "ast_hash": "1df6eaca8d9c9f1ee64a16439a9b427d",
+    "semantic_hash": "1df6eaca8d9c9f1ee64a16439a9b427d"
+  },
+  "apps/player/src/flipbook/useFlipController.ts": {
+    "mtime": 1786899503.7674356,
+    "ast_hash": "49e0c1dac4acbf1ad737930b934836f4",
+    "semantic_hash": "49e0c1dac4acbf1ad737930b934836f4"
+  },
+  "apps/player/src/flipbook/usePageFlipEngine.ts": {
+    "mtime": 1786900964.557514,
+    "ast_hash": "06e071d4073d9ec99e577be18dd5db11",
+    "semantic_hash": "06e071d4073d9ec99e577be18dd5db11"
+  },
+  "apps/player/src/main.tsx": {
+    "mtime": 1786864794.3647566,
+    "ast_hash": "7e6467794721db8c2f3319ff754b49ad",
+    "semantic_hash": "7e6467794721db8c2f3319ff754b49ad"
+  },
+  "apps/player/tsconfig.json": {
+    "mtime": 1786750035.4658124,
+    "ast_hash": "10f973a6f41dbd8ee879832b9f14facd",
+    "semantic_hash": "10f973a6f41dbd8ee879832b9f14facd"
+  },
+  "apps/player/vite.config.ts": {
+    "mtime": 1786857257.128257,
+    "ast_hash": "fac40478b56044a87d5171c0d41af0ac",
+    "semantic_hash": "fac40478b56044a87d5171c0d41af0ac"
+  },
+  "apps/worker/package.json": {
+    "mtime": 1786749971.286617,
+    "ast_hash": "94edba444337343c6f9d3758f56ab36a",
+    "semantic_hash": "94edba444337343c6f9d3758f56ab36a"
+  },
+  "apps/worker/src/convert.ts": {
+    "mtime": 1786751725.3235357,
+    "ast_hash": "bc95dbd05a064c5c085ee92a8a5eafe0",
+    "semantic_hash": "bc95dbd05a064c5c085ee92a8a5eafe0"
+  },
+  "apps/worker/tsconfig.json": {
+    "mtime": 1786750811.7525914,
+    "ast_hash": "78f6e161e9801429468b3b49c0ae4373",
+    "semantic_hash": "78f6e161e9801429468b3b49c0ae4373"
+  },
+  "fixtures/make-test-pdf.mjs": {
+    "mtime": 1786751674.7295074,
+    "ast_hash": "bc3247c3bda5d29b789a9d8b487e61f7",
+    "semantic_hash": "bc3247c3bda5d29b789a9d8b487e61f7"
+  },
+  "package.json": {
+    "mtime": 1786750820.5870981,
+    "ast_hash": "57631f22e3c29cc4450f4721834aac8f",
+    "semantic_hash": "57631f22e3c29cc4450f4721834aac8f"
+  },
+  "packages/manifest/package.json": {
+    "mtime": 1786749799.4736705,
+    "ast_hash": "c3992288aa6babc8d2d1e43bc560c4c6",
+    "semantic_hash": "c3992288aa6babc8d2d1e43bc560c4c6"
+  },
+  "packages/manifest/src/index.ts": {
+    "mtime": 1786751418.7852817,
+    "ast_hash": "d5c289f20984eed68a2f769f5fb75dea",
+    "semantic_hash": "d5c289f20984eed68a2f769f5fb75dea"
+  },
+  "packages/pdf-engine/package.json": {
+    "mtime": 1786750827.4479446,
+    "ast_hash": "b1ef6d4b05b3d06dc45e41de7cf2a66e",
+    "semantic_hash": "b1ef6d4b05b3d06dc45e41de7cf2a66e"
+  },
+  "packages/pdf-engine/src/index.ts": {
+    "mtime": 1786749961.4000506,
+    "ast_hash": "0ebed10360220c103bce0bda189fd1ac",
+    "semantic_hash": "0ebed10360220c103bce0bda189fd1ac"
+  },
+  "packages/pdf-engine/src/pdfium-engine.ts": {
+    "mtime": 1786750785.712253,
+    "ast_hash": "1d28a3311ee6023c9eb8815d9cbb208e",
+    "semantic_hash": "1d28a3311ee6023c9eb8815d9cbb208e"
+  },
+  "packages/pdf-engine/src/pdfjs-annots.ts": {
+    "mtime": 1786751750.723642,
+    "ast_hash": "befad6e7932f56dfb7563c22ff584376",
+    "semantic_hash": "befad6e7932f56dfb7563c22ff584376"
+  },
+  "packages/pdf-engine/src/types.ts": {
+    "mtime": 1786749823.2099807,
+    "ast_hash": "4639f35e6fa5f1331d661018046eb605",
+    "semantic_hash": "4639f35e6fa5f1331d661018046eb605"
+  },
+  "packages/pdf-engine/tsconfig.json": {
+    "mtime": 1786750812.44357,
+    "ast_hash": "78f6e161e9801429468b3b49c0ae4373",
+    "semantic_hash": "78f6e161e9801429468b3b49c0ae4373"
+  },
+  "tsconfig.base.json": {
+    "mtime": 1786749798.0696232,
+    "ast_hash": "80e3b8b127764b91ae87b9cd8ed901a0",
+    "semantic_hash": "80e3b8b127764b91ae87b9cd8ed901a0"
+  }
+}

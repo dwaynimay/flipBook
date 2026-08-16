@@ -14,6 +14,7 @@ interface Props {
   onZoomOut(): void;
   onToggleSidebar(tab: SidebarTab): void;
   onToggleShare(): void;
+  onToggleHideControls?(): void;
 }
 
 function toggleFullscreen(): void {
@@ -35,6 +36,7 @@ export function ControllerBar({
   onZoomOut,
   onToggleSidebar,
   onToggleShare,
+  onToggleHideControls,
 }: Props): React.ReactElement {
   const zoomFill = ((zoom - minZoom) / (maxZoom - minZoom)) * 100;
   return (
@@ -105,9 +107,19 @@ export function ControllerBar({
         >
           <ShareIcon />
         </button>
-        <button type="button" onClick={toggleFullscreen} aria-label="Layar penuh">
+        <button type="button" onClick={toggleFullscreen} aria-label="Layar penuh" title="Layar penuh">
           <FullscreenIcon />
         </button>
+        {onToggleHideControls && (
+          <button
+            type="button"
+            onClick={onToggleHideControls}
+            aria-label="Sembunyikan navigasi"
+            title="Sembunyikan navigasi"
+          >
+            <ChevronDownIcon />
+          </button>
+        )}
       </div>
     </nav>
   );
@@ -177,7 +189,23 @@ function ShareIcon(): React.ReactElement {
 function FullscreenIcon(): React.ReactElement {
   return (
     <Icon>
-      <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" {...stroke} />
+      <path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4" {...stroke} />
+    </Icon>
+  );
+}
+
+export function ChevronDownIcon(): React.ReactElement {
+  return (
+    <Icon>
+      <path d="M6 9l6 6 6-6" {...stroke} />
+    </Icon>
+  );
+}
+
+export function ChevronUpIcon(): React.ReactElement {
+  return (
+    <Icon>
+      <path d="M18 15l-6-6-6 6" {...stroke} />
     </Icon>
   );
 }

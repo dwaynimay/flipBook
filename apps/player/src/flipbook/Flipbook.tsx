@@ -4,7 +4,7 @@ import { useFlipController } from './useFlipController';
 import { FlipStage } from './effects/FlipStage';
 import { Sidebar, type SidebarTab } from './Sidebar';
 import { ShareMenu } from './ShareMenu';
-import { ControllerBar, Chevron } from './ControllerBar';
+import { ControllerBar, Chevron, ChevronUpIcon } from './ControllerBar';
 
 /** Di bawah lebar ini, tampilkan satu halaman — dua halaman jadi terlalu kecil. */
 const TWO_PAGE_MIN_WIDTH = 760;
@@ -34,6 +34,11 @@ export function Flipbook({
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [sidebarTab, setSidebarTab] = useState<SidebarTab | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [isHoveringControls, setIsHoveringControls] = useState(false);
+  const [isHoveringStage, setIsHoveringStage] = useState(false);
+
+  const shouldShowControls = isHoveringControls || sidebarTab !== null || shareOpen;
+  const shouldShowStageNav = isHoveringStage || shouldShowControls;
 
   const twoPage = viewport.width >= TWO_PAGE_MIN_WIDTH;
 
@@ -46,13 +51,6 @@ export function Flipbook({
     ? Math.ceil(manifest.pageCount / 2)
     : Math.max(0, manifest.pageCount - 1);
 
-  /**
-   * Halaman terakhir yang benar-benar dituju pembaca.
-   *
-   * Ini sumber kebenaran yang bertahan saat tata letak berpindah antara satu
-   * dan dua halaman — `spread` tidak bisa dipakai untuk itu, karena artinya
-   * berubah total di antara kedua mode.
-   */
   const lastPageRef = useRef(initialPage);
 
   const handleSpreadChange = useCallback(
@@ -75,12 +73,6 @@ export function Flipbook({
   const currentPage = twoPage ? (spread === 0 ? 0 : spread * 2 - 1) : spread;
 
   // Ukur viewport.
-  //
-  // Pengukuran pertama dilakukan langsung dan sinkron — TIDAK menunggu
-  // ResizeObserver. Callback RO hanya dikirim saat browser memproduksi frame,
-  // sehingga di tab background, iframe tersembunyi, atau pane yang belum
-  // ditampilkan, flipbook akan diam kosong selamanya kalau kita hanya
-  // mengandalkan RO. Observer tetap dipasang untuk perubahan berikutnya.
   useLayoutEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -112,7 +104,7 @@ export function Flipbook({
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', onResize);
     };
-  }, [sidebarTab]);
+  }, []);
 
   /**
    * Petakan ulang posisi saat tata letak berpindah antara satu dan dua halaman.
@@ -140,11 +132,49 @@ export function Flipbook({
     return () => clearTimeout(timer);
   }, [turning, spread]);
 
+  const stageRef = useRef<any>(null);
+
+  const handleNext = useCallback(() => {
+    if (stageRef.current?.flipNext) {
+      stageRef.current.flipNext();
+    } else {
+      flip.next();
+    }
+  }, [flip]);
+
+  const handlePrev = useCallback(() => {
+    if (stageRef.current?.flipPrev) {
+      stageRef.current.flipPrev();
+    } else {
+      flip.prev();
+    }
+  }, [flip]);
+
+  const handleGoToSpread = useCallback(
+    (targetSpread: number) => {
+      const pageIndex = twoPage
+        ? targetSpread === 0
+          ? 0
+          : targetSpread * 2 - 1
+        : targetSpread;
+      if (stageRef.current?.flipToPage) {
+        stageRef.current.flipToPage(pageIndex);
+      } else {
+        flip.goToSpread(targetSpread);
+      }
+    },
+    [flip, twoPage]
+  );
+
   const goToPage = useCallback(
     (pageIndex: number) => {
       const clamped = Math.max(0, Math.min(manifest.pageCount - 1, pageIndex));
       lastPageRef.current = clamped;
-      flip.goToSpread(twoPage ? Math.ceil(clamped / 2) : clamped);
+      if (stageRef.current?.flipToPage) {
+        stageRef.current.flipToPage(clamped);
+      } else {
+        flip.goToSpread(twoPage ? (clamped === 0 ? 0 : Math.ceil(clamped / 2)) : clamped);
+      }
     },
     [flip, twoPage, manifest.pageCount],
   );
@@ -158,19 +188,19 @@ export function Flipbook({
 
       if (e.key === 'ArrowRight' || e.key === 'PageDown') {
         e.preventDefault();
-        flip.next();
+        handleNext();
       } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
-        flip.prev();
+        handlePrev();
       } else if (e.key === 'Home') {
-        flip.goToSpread(0);
+        handleGoToSpread(0);
       } else if (e.key === 'End') {
-        flip.goToSpread(sheetCount);
+        handleGoToSpread(sheetCount);
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [flip, sheetCount]);
+  }, [handleNext, handlePrev, handleGoToSpread, sheetCount]);
 
   /**
    * Sampul depan dan sampul belakang tampil sendirian, dipusatkan — tidak
@@ -190,7 +220,7 @@ export function Flipbook({
       return { pageWidth: 0, pageHeight: 0, bookWidth: 0 };
     }
     const pageAspect = first.width / first.height;
-    const columns = twoPage && !soloAtEdge ? 2 : 1;
+    const columns = twoPage ? 2 : 1;
 
     const availableWidth = Math.max(0, viewport.width - STAGE_PADDING * 2);
     const availableHeight = Math.max(0, viewport.height - STAGE_PADDING * 2);
@@ -204,7 +234,15 @@ export function Flipbook({
     }
 
     return { pageWidth, pageHeight, bookWidth: pageWidth * columns };
-  }, [manifest.pages, viewport, twoPage, soloAtEdge]);
+  }, [manifest.pages, viewport, twoPage]);
+
+  const coverOffset = twoPage
+    ? spread === 0
+      ? -layout.pageWidth / 2
+      : spread === sheetCount
+        ? layout.pageWidth / 2
+        : 0
+    : 0;
 
   const dragHandlers = flip.bindDrag(layout.pageWidth);
 
@@ -219,13 +257,43 @@ export function Flipbook({
     [goToPage],
   );
 
+  const [seekingSpread, setSeekingSpread] = useState<number | null>(null);
+
+  const activeSpread = seekingSpread !== null ? seekingSpread : spread;
+
+  const handleSeekCommit = useCallback(
+    (targetSpread: number) => {
+      setSeekingSpread(null);
+      handleGoToSpread(targetSpread);
+    },
+    [handleGoToSpread],
+  );
+
+  useEffect(() => {
+    if (seekingSpread === null) return;
+
+    const handleWindowUp = () => {
+      handleSeekCommit(seekingSpread);
+    };
+
+    window.addEventListener('pointerup', handleWindowUp);
+    window.addEventListener('mouseup', handleWindowUp);
+    window.addEventListener('touchend', handleWindowUp);
+
+    return () => {
+      window.removeEventListener('pointerup', handleWindowUp);
+      window.removeEventListener('mouseup', handleWindowUp);
+      window.removeEventListener('touchend', handleWindowUp);
+    };
+  }, [seekingSpread, handleSeekCommit]);
+
   const pageLabel = !twoPage
-    ? String(spread + 1)
-    : spread === 0
+    ? String(activeSpread + 1)
+    : activeSpread === 0
       ? '1'
-      : spread === sheetCount
+      : activeSpread === sheetCount
         ? String(manifest.pageCount)
-        : `${spread * 2}–${Math.min(spread * 2 + 1, manifest.pageCount)}`;
+        : `${activeSpread * 2}–${Math.min(activeSpread * 2 + 1, manifest.pageCount)}`;
 
   // Panning saat di-zoom; drag flip dinonaktifkan agar tidak saling rebut gesture.
   const panRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0 });
@@ -275,27 +343,26 @@ export function Flipbook({
   }, []);
 
   const zoomed = zoom > MIN_ZOOM;
-  /**
-   * Seek bar digerakkan lewat `spread`, BUKAN `currentPage`. `currentPage`
-   * adalah nilai turunan (mis. 0,1,3,5,7,... di mode dua-halaman — angka
-   * genap tidak pernah muncul), jadi kalau seek bar dipakukan ke rentang
-   * halaman penuh, setengah dari posisi integer tidak pernah tercapai:
-   * begitu drag lewat titik itu, render berikutnya menarik `value` balik ke
-   * halaman valid terdekat, dan geseran terasa macet/nyentak. `spread` tidak
-   * begini — setiap posisi memetakan satu status nyata, jadi selalu tuntas.
-   */
+
   const seekMax = sheetCount;
-  const seekFill = seekMax > 0 ? (spread / seekMax) * 100 : 0;
+  const seekFill = seekMax > 0 ? (activeSpread / seekMax) * 100 : 0;
   const stageProps = {
     assetBase,
     spread,
     sheetCount,
+    pages: manifest.pages,
+    pageWidth: layout.pageWidth,
+    pageHeight: layout.pageHeight,
     turning,
     angleOf,
     pageOf,
     settled,
     twoPage,
-    soloIndex: soloAtEdge ? soloIndex : null,
+    soloIndex: null,
+    onPageChange: (p: number) => {
+      const sp = twoPage ? (p === 0 ? 0 : Math.ceil(p / 2)) : p;
+      flip.goToSpread(sp);
+    },
     onLinkClick: handleLinkClick,
   };
 
@@ -313,26 +380,34 @@ export function Flipbook({
           />
         )}
 
-        <div className="flipbook__stage" ref={containerRef}>
+        <div
+          className="flipbook__stage"
+          ref={containerRef}
+          onMouseEnter={() => setIsHoveringStage(true)}
+          onMouseLeave={() => setIsHoveringStage(false)}
+        >
           {layout.pageWidth > 0 && (
             <div
               className="stage__viewport"
-              style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
-              {...(zoomed ? zoomHandlers : dragHandlers)}
+              style={{
+                transform: `translate(${pan.x + coverOffset}px, ${pan.y}px) scale(${zoom})`,
+                transition: zoomed ? 'none' : 'transform 0.3s ease-out',
+              }}
+              {...(zoomed ? zoomHandlers : undefined)}
             >
               <div
                 className={`book${!twoPage ? ' book--single' : ''}`}
                 style={{ width: layout.bookWidth, height: layout.pageHeight }}
               >
-                <FlipStage {...stageProps} />
+                <FlipStage ref={stageRef} {...stageProps} />
               </div>
             </div>
           )}
 
           <button
             type="button"
-            className="stage-nav stage-nav--prev"
-            onClick={flip.prev}
+            className={`stage-nav stage-nav--prev ${!shouldShowStageNav ? 'stage-nav--hidden' : ''}`}
+            onClick={handlePrev}
             disabled={!flip.canPrev}
             aria-label="Halaman sebelumnya"
           >
@@ -340,8 +415,8 @@ export function Flipbook({
           </button>
           <button
             type="button"
-            className="stage-nav stage-nav--next"
-            onClick={flip.next}
+            className={`stage-nav stage-nav--next ${!shouldShowStageNav ? 'stage-nav--hidden' : ''}`}
+            onClick={handleNext}
             disabled={!flip.canNext}
             aria-label="Halaman berikutnya"
           >
@@ -350,14 +425,18 @@ export function Flipbook({
         </div>
       </div>
 
-      <div className="flipbook__controls">
+      <div
+        className={`flipbook__controls ${!shouldShowControls ? 'flipbook__controls--hidden' : ''}`}
+        onMouseEnter={() => setIsHoveringControls(true)}
+        onMouseLeave={() => setIsHoveringControls(false)}
+      >
         <input
           type="range"
           className="seekbar"
           min={0}
           max={seekMax}
-          value={spread}
-          onChange={(e) => flip.goToSpread(Number(e.target.value))}
+          value={activeSpread}
+          onChange={(e) => setSeekingSpread(Number(e.target.value))}
           style={{ '--fill': `${seekFill}%` } as React.CSSProperties}
           aria-label="Cari halaman"
         />
@@ -376,6 +455,7 @@ export function Flipbook({
           onZoomOut={() => zoomBy(-ZOOM_STEP)}
           onToggleSidebar={toggleSidebar}
           onToggleShare={() => setShareOpen((v) => !v)}
+          onToggleHideControls={() => setIsHoveringControls(false)}
         />
       </div>
 
