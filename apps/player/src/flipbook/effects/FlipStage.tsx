@@ -11,6 +11,10 @@ export interface StageProps {
   pageOf(index: number): PageManifest | null;
   settled: boolean;
   twoPage: boolean;
+  /** Saat bukan null, tampilkan hanya satu halaman ini — dipusatkan, tanpa
+   *  lembar berputar. Dipakai untuk sampul depan/belakang yang tidak punya
+   *  pasangan (lihat `soloAtEdge` di Flipbook.tsx). */
+  soloIndex: number | null;
   onLinkClick(link: { url?: string; targetPage?: number }): void;
 }
 
@@ -34,7 +38,24 @@ export interface StageProps {
  *              terlihat rata terang meski ada lembar tebal melayang di atasnya.
  */
 export function FlipStage(props: StageProps): React.ReactElement {
-  return props.twoPage ? <TwoPage {...props} /> : <SinglePage {...props} />;
+  if (!props.twoPage) return <SinglePage {...props} />;
+  if (props.soloIndex !== null) return <SoloPage {...props} soloIndex={props.soloIndex} />;
+  return <TwoPage {...props} />;
+}
+
+/** Sampul depan/belakang sendirian: satu halaman dipusatkan, tanpa lembar. */
+function SoloPage({
+  assetBase,
+  soloIndex,
+  pageOf,
+  settled,
+  onLinkClick,
+}: StageProps & { soloIndex: number }): React.ReactElement {
+  return (
+    <div className="book__static book__static--single book__static--edge">
+      <PageFace page={pageOf(soloIndex)} assetBase={assetBase} wantFull={settled} onLinkClick={onLinkClick} />
+    </div>
+  );
 }
 
 /** Sudut → tiga koefisien cahaya, dipakai kedua mode. */
@@ -52,7 +73,6 @@ function lightingFor(angle: number): { shade: number; shine: number; contact: nu
 function TwoPage({
   assetBase,
   spread,
-  sheetCount,
   turning,
   angleOf,
   pageOf,
@@ -74,16 +94,9 @@ function TwoPage({
   const rightContact = turning && Math.abs(angle) < 90 ? contact : 0;
   const leftContact = turning && Math.abs(angle) > 90 ? -contact : 0;
 
-  // Tumpukan tepi halaman disembunyikan di ujung buku — tidak ada "halaman
-  // yang sudah dibaca" sebelum sampul, tidak ada "sisa halaman" setelah akhir.
-  const atFirstSpread = spread === 0;
-  const atLastSpread = spread === sheetCount;
-
   return (
     <>
-      <div
-        className={`book__static book__static--left${atFirstSpread ? ' book__static--edge' : ''}`}
-      >
+      <div className="book__static book__static--left">
         <PageFace page={pageOf(leftIndex)} assetBase={assetBase} wantFull={settled} onLinkClick={onLinkClick} />
         {leftContact > 0 && (
           <div
@@ -95,9 +108,7 @@ function TwoPage({
         <div className="gutter gutter--left" aria-hidden="true" />
       </div>
 
-      <div
-        className={`book__static book__static--right${atLastSpread ? ' book__static--edge' : ''}`}
-      >
+      <div className="book__static book__static--right">
         <PageFace page={pageOf(rightIndex)} assetBase={assetBase} wantFull={settled} onLinkClick={onLinkClick} />
         {rightContact > 0 && (
           <div
@@ -140,7 +151,6 @@ function TwoPage({
 function SinglePage({
   assetBase,
   spread,
-  sheetCount,
   turning,
   angleOf,
   pageOf,
@@ -157,11 +167,10 @@ function SinglePage({
   // permukaan; di paruh kedua tidak ada "halaman baru" yang didarati karena
   // halaman statis di bawah sudah menampilkan target sejak awal.
   const departContact = turning ? Math.max(0, 1 - Math.abs(angle) / 90) : 0;
-  const atLastPage = spread >= sheetCount;
 
   return (
     <>
-      <div className={`book__static book__static--single${atLastPage ? ' book__static--edge' : ''}`}>
+      <div className="book__static book__static--single">
         <PageFace page={pageOf(staticIndex)} assetBase={assetBase} wantFull={settled} onLinkClick={onLinkClick} />
         {departContact > 0 && (
           <div

@@ -1,30 +1,20 @@
-import type { PageEffect } from '@flip/manifest';
 import type { SidebarTab } from './Sidebar';
 
 interface Props {
   title: string;
   pageLabel: string;
   pageCount: number;
-  canPrev: boolean;
-  canNext: boolean;
-  zoomed: boolean;
-  zoomDisabled: boolean;
-  effect: PageEffect;
+  zoom: number;
+  minZoom: number;
+  maxZoom: number;
   activeTab: SidebarTab | null;
   shareOpen: boolean;
-  onPrev(): void;
-  onNext(): void;
-  onToggleZoom(): void;
-  onEffectChange(effect: PageEffect): void;
+  onZoomChange(value: number): void;
+  onZoomIn(): void;
+  onZoomOut(): void;
   onToggleSidebar(tab: SidebarTab): void;
   onToggleShare(): void;
 }
-
-const EFFECT_LABELS: Record<PageEffect, string> = {
-  flip: 'Balik',
-  slide: 'Geser',
-  scroll: 'Gulir',
-};
 
 function toggleFullscreen(): void {
   if (document.fullscreenElement) void document.exitFullscreen();
@@ -35,20 +25,18 @@ export function ControllerBar({
   title,
   pageLabel,
   pageCount,
-  canPrev,
-  canNext,
-  zoomed,
-  zoomDisabled,
-  effect,
+  zoom,
+  minZoom,
+  maxZoom,
   activeTab,
   shareOpen,
-  onPrev,
-  onNext,
-  onToggleZoom,
-  onEffectChange,
+  onZoomChange,
+  onZoomIn,
+  onZoomOut,
   onToggleSidebar,
   onToggleShare,
 }: Props): React.ReactElement {
+  const zoomFill = ((zoom - minZoom) / (maxZoom - minZoom)) * 100;
   return (
     <nav className="controller" aria-label="Kontrol flipbook">
       <div className="controller__group controller__group--start">
@@ -85,40 +73,28 @@ export function ControllerBar({
       </div>
 
       <div className="controller__group">
-        <button type="button" onClick={onPrev} disabled={!canPrev} aria-label="Halaman sebelumnya">
-          <Chevron direction="left" />
-        </button>
         <span className="controller__pages" aria-live="polite">
           {pageLabel} <span className="controller__sep">/</span> {pageCount}
         </span>
-        <button type="button" onClick={onNext} disabled={!canNext} aria-label="Halaman berikutnya">
-          <Chevron direction="right" />
-        </button>
       </div>
 
       <div className="controller__group controller__group--end">
-        <div className="segmented" role="group" aria-label="Mode membaca">
-          {(Object.keys(EFFECT_LABELS) as PageEffect[]).map((key) => (
-            <button
-              key={key}
-              type="button"
-              className={effect === key ? 'segmented__on' : undefined}
-              aria-pressed={effect === key}
-              onClick={() => onEffectChange(key)}
-            >
-              {EFFECT_LABELS[key]}
-            </button>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={onToggleZoom}
-          disabled={zoomDisabled}
-          aria-pressed={zoomed}
-          aria-label={zoomed ? 'Perkecil' : 'Perbesar'}
-        >
-          {zoomed ? '−' : '+'}
+        <button type="button" onClick={onZoomOut} disabled={zoom <= minZoom} aria-label="Perkecil">
+          −
+        </button>
+        <input
+          type="range"
+          className="zoom-slider"
+          min={minZoom}
+          max={maxZoom}
+          step={0.05}
+          value={zoom}
+          onChange={(e) => onZoomChange(Number(e.target.value))}
+          style={{ '--fill': `${zoomFill}%` } as React.CSSProperties}
+          aria-label="Level perbesaran"
+        />
+        <button type="button" onClick={onZoomIn} disabled={zoom >= maxZoom} aria-label="Perbesar">
+          +
         </button>
         <button
           type="button"
@@ -155,7 +131,7 @@ function Icon({ children }: { children: React.ReactNode }): React.ReactElement {
   );
 }
 
-function Chevron({ direction }: { direction: 'left' | 'right' }): React.ReactElement {
+export function Chevron({ direction }: { direction: 'left' | 'right' }): React.ReactElement {
   return <Icon>{<path d={direction === 'left' ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'} {...stroke} />}</Icon>;
 }
 

@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { BookManifest, PageEffect, PageManifest } from '@flip/manifest';
+import type { BookManifest, PageManifest } from '@flip/manifest';
 import { useFlipController } from './useFlipController';
 import { FlipStage } from './effects/FlipStage';
-import { SlideStage } from './effects/SlideStage';
-import { ScrollStage } from './effects/ScrollStage';
 import { Sidebar, type SidebarTab } from './Sidebar';
 import { ShareMenu } from './ShareMenu';
-import { ControllerBar } from './ControllerBar';
+import { ControllerBar, Chevron } from './ControllerBar';
 
 /** Di bawah lebar ini, tampilkan satu halaman — dua halaman jadi terlalu kecil. */
 const TWO_PAGE_MIN_WIDTH = 760;
 const STAGE_PADDING = 32;
+
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 3;
+const ZOOM_STEP = 0.25;
 
 interface Props {
   manifest: BookManifest;
@@ -30,13 +32,10 @@ export function Flipbook({
   const [settled, setSettled] = useState(true);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [effect, setEffect] = useState<PageEffect>(manifest.settings.effect);
   const [sidebarTab, setSidebarTab] = useState<SidebarTab | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
-  const [scrollPage, setScrollPage] = useState(initialPage);
 
   const twoPage = viewport.width >= TWO_PAGE_MIN_WIDTH;
-  const isScroll = effect === 'scroll';
 
   const pageOf = useCallback(
     (index: number): PageManifest | null => manifest.pages[index] ?? null,
@@ -72,8 +71,8 @@ export function Flipbook({
   );
   const { spread, turning, angleOf } = flip;
 
-  /** Halaman yang dianggap "sedang dibaca" — dipakai thumbnail & scroll. */
-  const currentPage = isScroll ? scrollPage : twoPage ? (spread === 0 ? 0 : spread * 2 - 1) : spread;
+  /** Halaman yang dianggap "sedang dibaca" — dipakai thumbnail & sidebar. */
+  const currentPage = twoPage ? (spread === 0 ? 0 : spread * 2 - 1) : spread;
 
   // Ukur viewport.
   //
@@ -127,10 +126,9 @@ export function Flipbook({
   useEffect(() => {
     if (prevTwoPage.current === twoPage) return;
     prevTwoPage.current = twoPage;
-    if (isScroll) return;
     const page = lastPageRef.current;
     flip.goToSpread(twoPage ? Math.ceil(page / 2) : page);
-  }, [twoPage, isScroll, flip]);
+  }, [twoPage, flip]);
 
   // Varian resolusi penuh hanya dimuat setelah animasi benar-benar berhenti.
   useEffect(() => {
@@ -146,43 +144,13 @@ export function Flipbook({
     (pageIndex: number) => {
       const clamped = Math.max(0, Math.min(manifest.pageCount - 1, pageIndex));
       lastPageRef.current = clamped;
-      if (isScroll) {
-        setScrollPage(clamped);
-        onPageChange(clamped);
-        return;
-      }
       flip.goToSpread(twoPage ? Math.ceil(clamped / 2) : clamped);
     },
-    [isScroll, flip, twoPage, manifest.pageCount, onPageChange],
+    [flip, twoPage, manifest.pageCount],
   );
 
-  const handleScrollPageChange = useCallback(
-    (pageIndex: number) => {
-      lastPageRef.current = pageIndex;
-      setScrollPage(pageIndex);
-      onPageChange(pageIndex);
-    },
-    [onPageChange],
-  );
-
-  /**
-   * Jaga posisi baca saat pembaca berganti mode. Mode gulir melacak halaman
-   * secara langsung, mode balik/geser lewat spread — keduanya perlu
-   * disinkronkan lewat halaman terakhir yang dituju.
-   */
-  const prevEffect = useRef(effect);
+  // Navigasi keyboard.
   useEffect(() => {
-    if (prevEffect.current === effect) return;
-    const wasScroll = prevEffect.current === 'scroll';
-    prevEffect.current = effect;
-    const page = lastPageRef.current;
-    if (isScroll) setScrollPage(page);
-    else if (wasScroll) flip.goToSpread(twoPage ? Math.ceil(page / 2) : page);
-  }, [effect, isScroll, twoPage, flip]);
-
-  // Navigasi keyboard. Di mode scroll, biarkan browser menangani scroll native.
-  useEffect(() => {
-    if (isScroll) return;
     const onKey = (e: KeyboardEvent): void => {
       const target = e.target as HTMLElement | null;
       // Jangan bajak panah saat pembaca sedang mengetik di kotak pencarian.
@@ -202,7 +170,18 @@ export function Flipbook({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [flip, sheetCount, isScroll]);
+  }, [flip, sheetCount]);
+
+  /**
+   * Sampul depan dan sampul belakang tampil sendirian, dipusatkan — tidak
+   * ada halaman untuk mengisi slot pasangannya. Tanpa ini, kotak buku tetap
+   * selebar dua halaman dengan separuh kosong transparan, dan sampul terlihat
+   * "menepi" alih-alih di tengah, baru melompat ke tengah sungguhan begitu
+   * buku dibuka. Hanya berlaku saat diam — begitu membalik dimulai, lembar
+   * butuh kotak dua-halaman penuh supaya engselnya benar.
+   */
+  const soloAtEdge = twoPage && !turning && (spread === 0 || spread === sheetCount);
+  const soloIndex = spread === 0 ? 0 : spread * 2 - 1;
 
   // Geometri: muat buku ke dalam viewport dengan mempertahankan rasio halaman.
   const layout = useMemo(() => {
@@ -211,7 +190,7 @@ export function Flipbook({
       return { pageWidth: 0, pageHeight: 0, bookWidth: 0 };
     }
     const pageAspect = first.width / first.height;
-    const columns = twoPage ? 2 : 1;
+    const columns = twoPage && !soloAtEdge ? 2 : 1;
 
     const availableWidth = Math.max(0, viewport.width - STAGE_PADDING * 2);
     const availableHeight = Math.max(0, viewport.height - STAGE_PADDING * 2);
@@ -225,7 +204,7 @@ export function Flipbook({
     }
 
     return { pageWidth, pageHeight, bookWidth: pageWidth * columns };
-  }, [manifest.pages, viewport, twoPage]);
+  }, [manifest.pages, viewport, twoPage, soloAtEdge]);
 
   const dragHandlers = flip.bindDrag(layout.pageWidth);
 
@@ -240,13 +219,13 @@ export function Flipbook({
     [goToPage],
   );
 
-  const pageLabel = isScroll
-    ? String(currentPage + 1)
-    : twoPage
-      ? spread === 0
-        ? '1'
-        : `${Math.min(spread * 2, manifest.pageCount)}–${Math.min(spread * 2 + 1, manifest.pageCount)}`
-      : String(spread + 1);
+  const pageLabel = !twoPage
+    ? String(spread + 1)
+    : spread === 0
+      ? '1'
+      : spread === sheetCount
+        ? String(manifest.pageCount)
+        : `${spread * 2}–${Math.min(spread * 2 + 1, manifest.pageCount)}`;
 
   // Panning saat di-zoom; drag flip dinonaktifkan agar tidak saling rebut gesture.
   const panRef = useRef({ active: false, startX: 0, startY: 0, originX: 0, originY: 0 });
@@ -275,10 +254,18 @@ export function Flipbook({
     },
   };
 
-  const toggleZoom = useCallback(() => {
+  const handleZoomChange = useCallback((value: number) => {
+    const next = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value));
+    setZoom(next);
+    if (next <= MIN_ZOOM) setPan({ x: 0, y: 0 });
+  }, []);
+
+  // Update fungsional — klik tombol +/- beruntun harus terakumulasi dari nilai
+  // TERBARU, bukan dari `zoom` yang sudah usang di closure render saat itu.
+  const zoomBy = useCallback((delta: number) => {
     setZoom((z) => {
-      const next = z === 1 ? 2 : 1;
-      if (next === 1) setPan({ x: 0, y: 0 });
+      const next = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z + delta));
+      if (next <= MIN_ZOOM) setPan({ x: 0, y: 0 });
       return next;
     });
   }, []);
@@ -287,7 +274,18 @@ export function Flipbook({
     setSidebarTab((current) => (current === tab ? null : tab));
   }, []);
 
-  const zoomed = zoom !== 1;
+  const zoomed = zoom > MIN_ZOOM;
+  /**
+   * Seek bar digerakkan lewat `spread`, BUKAN `currentPage`. `currentPage`
+   * adalah nilai turunan (mis. 0,1,3,5,7,... di mode dua-halaman — angka
+   * genap tidak pernah muncul), jadi kalau seek bar dipakukan ke rentang
+   * halaman penuh, setengah dari posisi integer tidak pernah tercapai:
+   * begitu drag lewat titik itu, render berikutnya menarik `value` balik ke
+   * halaman valid terdekat, dan geseran terasa macet/nyentak. `spread` tidak
+   * begini — setiap posisi memetakan satu status nyata, jadi selalu tuntas.
+   */
+  const seekMax = sheetCount;
+  const seekFill = seekMax > 0 ? (spread / seekMax) * 100 : 0;
   const stageProps = {
     assetBase,
     spread,
@@ -297,6 +295,7 @@ export function Flipbook({
     pageOf,
     settled,
     twoPage,
+    soloIndex: soloAtEdge ? soloIndex : null,
     onLinkClick: handleLinkClick,
   };
 
@@ -315,51 +314,70 @@ export function Flipbook({
         )}
 
         <div className="flipbook__stage" ref={containerRef}>
-          {isScroll ? (
-            <ScrollStage
-              manifest={manifest}
-              assetBase={assetBase}
-              currentPage={currentPage}
-              onPageChange={handleScrollPageChange}
-              onLinkClick={handleLinkClick}
-            />
-          ) : (
-            layout.pageWidth > 0 && (
+          {layout.pageWidth > 0 && (
+            <div
+              className="stage__viewport"
+              style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
+              {...(zoomed ? zoomHandlers : dragHandlers)}
+            >
               <div
-                className="stage__viewport"
-                style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
-                {...(zoomed ? zoomHandlers : dragHandlers)}
+                className={`book${!twoPage ? ' book--single' : ''}`}
+                style={{ width: layout.bookWidth, height: layout.pageHeight }}
               >
-                <div
-                  className={`book${effect === 'slide' ? ' book--slide' : ''}${!twoPage ? ' book--single' : ''}`}
-                  style={{ width: layout.bookWidth, height: layout.pageHeight }}
-                >
-                  {effect === 'flip' ? <FlipStage {...stageProps} /> : <SlideStage {...stageProps} />}
-                </div>
+                <FlipStage {...stageProps} />
               </div>
-            )
+            </div>
           )}
+
+          <button
+            type="button"
+            className="stage-nav stage-nav--prev"
+            onClick={flip.prev}
+            disabled={!flip.canPrev}
+            aria-label="Halaman sebelumnya"
+          >
+            <Chevron direction="left" />
+          </button>
+          <button
+            type="button"
+            className="stage-nav stage-nav--next"
+            onClick={flip.next}
+            disabled={!flip.canNext}
+            aria-label="Halaman berikutnya"
+          >
+            <Chevron direction="right" />
+          </button>
         </div>
       </div>
 
-      <ControllerBar
-        title={manifest.title}
-        pageLabel={pageLabel}
-        pageCount={manifest.pageCount}
-        canPrev={isScroll ? currentPage > 0 : flip.canPrev}
-        canNext={isScroll ? currentPage < manifest.pageCount - 1 : flip.canNext}
-        zoomed={zoomed}
-        zoomDisabled={isScroll}
-        effect={effect}
-        activeTab={sidebarTab}
-        shareOpen={shareOpen}
-        onPrev={() => (isScroll ? goToPage(currentPage - 1) : flip.prev())}
-        onNext={() => (isScroll ? goToPage(currentPage + 1) : flip.next())}
-        onToggleZoom={toggleZoom}
-        onEffectChange={setEffect}
-        onToggleSidebar={toggleSidebar}
-        onToggleShare={() => setShareOpen((v) => !v)}
-      />
+      <div className="flipbook__controls">
+        <input
+          type="range"
+          className="seekbar"
+          min={0}
+          max={seekMax}
+          value={spread}
+          onChange={(e) => flip.goToSpread(Number(e.target.value))}
+          style={{ '--fill': `${seekFill}%` } as React.CSSProperties}
+          aria-label="Cari halaman"
+        />
+
+        <ControllerBar
+          title={manifest.title}
+          pageLabel={pageLabel}
+          pageCount={manifest.pageCount}
+          zoom={zoom}
+          minZoom={MIN_ZOOM}
+          maxZoom={MAX_ZOOM}
+          activeTab={sidebarTab}
+          shareOpen={shareOpen}
+          onZoomChange={handleZoomChange}
+          onZoomIn={() => zoomBy(ZOOM_STEP)}
+          onZoomOut={() => zoomBy(-ZOOM_STEP)}
+          onToggleSidebar={toggleSidebar}
+          onToggleShare={() => setShareOpen((v) => !v)}
+        />
+      </div>
 
       {shareOpen && <ShareMenu title={manifest.title} onClose={() => setShareOpen(false)} />}
     </div>
