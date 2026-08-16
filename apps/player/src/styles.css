@@ -26,6 +26,31 @@ body {
   overscroll-behavior: none;
 }
 
+/* ---------- prototipe react-pageflip (?proto=pageflip) ---------- */
+
+.pageflip-proto {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #1c1e26;
+}
+
+.pageflip-proto__page {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* Halaman sisipan tembus pandang — bikin sampul terlihat sendirian tanpa
+   perlu showCover:true (lihat komentar di PageFlipProto.tsx). */
+.pageflip-proto__page--blank {
+  background: transparent;
+  box-shadow: none;
+}
+
 /* ---------- shell ---------- */
 
 .shell {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { isBookManifest, type BookManifest } from '@flip/manifest';
 import { Flipbook } from './flipbook/Flipbook';
+import { PageFlipProto } from './flipbook/PageFlipProto';
 
 const BOOKS_ROOT = `${import.meta.env.BASE_URL}books`;
 
@@ -17,18 +18,21 @@ type LoadState =
   | { status: 'picker'; books: BookIndexEntry[] }
   | { status: 'error'; message: string };
 
-function readParams(): { bookId: string | null; page: number } {
+function readParams(): { bookId: string | null; page: number; proto: boolean } {
   const params = new URLSearchParams(window.location.search);
   const page = Number(params.get('page'));
   return {
     bookId: params.get('book'),
     page: Number.isFinite(page) && page > 0 ? page - 1 : 0,
+    // ?proto=pageflip — bandingkan engine react-pageflip tanpa mengubah jalur normal.
+    proto: params.get('proto') === 'pageflip',
   };
 }
 
 export function App(): React.ReactElement {
   const [state, setState] = useState<LoadState>({ status: 'loading' });
   const [initialPage] = useState(() => readParams().page);
+  const [useProto] = useState(() => readParams().proto);
 
   useEffect(() => {
     let cancelled = false;
@@ -119,6 +123,10 @@ export function App(): React.ReactElement {
         </div>
       </div>
     );
+  }
+
+  if (useProto) {
+    return <PageFlipProto manifest={state.manifest} assetBase={state.assetBase} />;
   }
 
   return (

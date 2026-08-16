@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   // Relatif — player harus bisa di-host di path mana pun dan disematkan lintas-origin.
   base: './',
-  server: { port: 5173 },
+  server: { port: Number(process.env.PORT) || 5173 },
   build: {
     target: 'es2022',
     // Anggaran bundle ditegakkan di sini. Lihat docs/02-ARCHITECTURE.md §5.4.

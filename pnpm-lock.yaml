@@ -32,6 +32,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.8(react@19.2.8)
+      react-pageflip:
+        specifier: ^2.0.3
+        version: 2.0.3
     devDependencies:
       '@types/react':
         specifier: ^19.0.1
@@ -1016,6 +1019,9 @@ packages:
     resolution: {integrity: sha512-D9UOmYG3UH1V+ENW56t5QXBwJw1YEY18ruVeus89Rw+SyIgjPkCO84bRzO3uNIYosJbNwiabWVn48o3uJLjxFQ==}
     engines: {node: '>=18'}
 
+  page-flip@2.0.7:
+    resolution: {integrity: sha512-96lQFUUz7r/LZzEUZJ3yBIMEKU9+m8HMFDzTvTdD6P7Ag/wXINjp9n0W7b4wanwnDbQETo4uNUoL3zMqpFxwGA==}
+
   pako@1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
 
@@ -1041,6 +1047,9 @@ packages:
     resolution: {integrity: sha512-rVprimfGBG3DR+Tq0IQG2DT5PxKth1WIGDmj5yPmlzr4YBe7uyE+Du4oVqTDXZSHGGGXRtTJEGSSePyQCMBglQ==}
     peerDependencies:
       react: ^19.2.8
+
+  react-pageflip@2.0.3:
+    resolution: {integrity: sha512-k81mHhRvUM52y8jyzTCh5t4O0lepkLhp+XGSUzq2C3uD+iW99Cv0jfRlqFCjZbD5N3jKkIFr7/3giucoXKDP3Q==}
 
   react-refresh@0.17.0:
     resolution: {integrity: sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==}
@@ -1846,6 +1855,8 @@ snapshots:
 
   node-releases@2.0.53: {}
 
+  page-flip@2.0.7: {}
+
   pako@1.0.11: {}
 
   pdf-lib@1.17.1:
@@ -1873,6 +1884,10 @@ snapshots:
     dependencies:
       react: 19.2.8
       scheduler: 0.27.0
+
+  react-pageflip@2.0.3:
+    dependencies:
+      page-flip: 2.0.7
 
   react-refresh@0.17.0: {}
 
